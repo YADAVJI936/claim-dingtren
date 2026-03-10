@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Meesho Universal Offline Hub</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --meesho-purple: #82004f;
+            --success-green: #2e7d32;
+            --border-color: #e0e0e0;
+        }
+
+        body { 
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+            background: #f0f2f5; 
+            padding: 10px; 
+            margin: 0; 
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Responsive Card */
+        .app-card { 
+            width: 100%;
+            max-width: 500px; 
+            background: white; 
+            border-radius: 16px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+            overflow: hidden; 
+            margin-top: 10px;
+        }
+
+        .header { 
+            background: var(--meesho-purple); 
+            color: white; 
+            padding: 20px; 
+            text-align: center; 
+        }
+        .header h2 { margin: 0; font-size: 22px; letter-spacing: 0.5px; }
+
+        /* Upload Section */
+        .upload-section { 
+            background: #fff5fa; 
+            padding: 20px; 
+            text-align: center; 
+            border-bottom: 1px solid #ffdaed; 
+        }
+        .upload-section label { 
+            font-weight: bold; 
+            color: var(--meesho-purple); 
+            display: block; 
+            margin-bottom: 12px; 
+            font-size: 14px; 
+        }
+        input[type="file"] { font-size: 12px; width: 100%; }
+
+        .status-badge { 
+            display: inline-block; 
+            margin-top: 12px; 
+            padding: 6px 16px; 
+            border-radius: 20px; 
+            font-size: 12px; 
+            font-weight: 600; 
+            background: #eee; 
+            color: #555; 
+        }
+        .status-success { background: #e8f5e9; color: var(--success-green); border: 1px solid #a5d6a7; }
+
+        /* Camera Viewport - Optimized for Mobile */
+        #reader-container { background: #000; display: none; position: relative; }
+        #reader { width: 100%; }
+        .close-cam { 
+            width: 100%; 
+            background: #333; 
+            color: white; 
+            border: none; 
+            padding: 15px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 14px; 
+            text-transform: uppercase;
+        }
+
+        /* Form Content */
+        .content { padding: 20px; }
+        .field-group { margin-bottom: 24px; }
+        .field-group label { 
+            display: block; 
+            font-size: 11px; 
+            font-weight: 800; 
+            color: #888; 
+            margin-bottom: 8px; 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+        }
+        
+        /* Inputs & Buttons */
+        .input-row { display: flex; gap: 8px; margin-bottom: 10px; }
+        input[type="text"] { 
+            flex: 1; 
+            padding: 14px; 
+            border: 2px solid var(--border-color); 
+            border-radius: 10px; 
+            font-size: 16px; /* Prevents auto-zoom on iPhone */
+            font-family: 'Courier New', monospace; 
+            background: #fafafa;
+            transition: border 0.3s;
+        }
+        input[type="text"]:focus { border-color: var(--meesho-purple); outline: none; background: #fff; }
+
+        .btn-row { display: flex; gap: 10px; }
+        button { 
+            flex: 1; 
+            padding: 14px; 
+            border: none; 
+            border-radius: 10px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            font-size: 13px; 
+            transition: transform 0.1s, opacity 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        button:active { transform: scale(0.98); opacity: 0.9; }
+
+        .btn-scan { background: var(--meesho-purple); color: white; box-shadow: 0 4px 10px rgba(130, 0, 79, 0.2); }
+        .btn-copy { background: #fce4ec; color: var(--meesho-purple); border: 1px solid var(--meesho-purple); }
+        .btn-copy-sub { background: #e8f5e9; color: var(--success-green); border: 1px solid var(--success-green); width: 100%; }
+
+        .clear-btn { 
+            width: 100%; 
+            background: transparent; 
+            color: #999; 
+            margin-top: 20px; 
+            border: 1px dashed #ccc; 
+            font-size: 12px;
+        }
+
+        /* Desktop Adjustments */
+        @media (min-width: 600px) {
+            body { padding: 40px 20px; }
+            .app-card { border-radius: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-card">
+    <div class="header">
+        <h2>Universal Claim Hub</h2>
+    </div>
+
+    <div class="upload-section">
+        <label>📁 UPLOAD RETURNS REPORT (EXCEL/CSV)</label>
+        <input type="file" id="excelFile" accept=".csv, .xlsx, .xls">
+        <div id="fileStatus" class="status-badge">No file loaded</div>
+    </div>
+
+    <div id="reader-container">
+        <div id="reader"></div>
+        <button class="close-cam" onclick="stopScanner()">🛑 Close Scanner</button>
+    </div>
+
+    <div class="content">
+        <div class="field-group">
+            <label>1. AWB Number (Scan Barcode/QR)</label>
+            <div class="input-row">
+                <input type="text" id="awb" placeholder="Awaiting scan..." oninput="manualAwbCheck()">
+            </div>
+            <div class="btn-row">
+                <button class="btn-scan" onclick="startScanner('awb')">📷 SCAN AWB</button>
+                <button class="btn-copy" onclick="copy('awb')">COPY</button>
+            </div>
+        </div>
+
+        <div class="field-group">
+            <label>2. Sub-Order ID (Direct from Column I)</label>
+            <div class="input-row">
+                <input type="text" id="subid" placeholder="Auto-fills from file..." readonly style="background: #f0fdf4;">
+            </div>
+            <button class="btn-copy-sub" onclick="copy('subid')">✅ COPY SUB-ORDER ID</button>
+        </div>
+
+        <div class="field-group">
+            <label>3. Packet ID (Scan QR/Barcode)</label>
+            <div class="input-row">
+                <input type="text" id="pid" placeholder="Awaiting scan...">
+            </div>
+            <div class="btn-row">
+                <button class="btn-scan" onclick="startScanner('pid')" style="background: #444;">📷 SCAN PACKET</button>
+                <button class="btn-copy" onclick="copy('pid')">COPY</button>
+            </div>
+        </div>
+
+        <button class="clear-btn" onclick="clearForm()">🗑️ CLEAR FOR NEXT ORDER</button>
+    </div>
+</div>
+
+<script>
+    let html5QrCode = null;
+    let currentTarget = '';
+    let excelData = []; 
+
+    // --- EXCEL LOGIC ---
+    document.getElementById('excelFile').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const data = new Uint8Array(event.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            excelData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {header: 1});
+            const statusBadge = document.getElementById('fileStatus');
+            statusBadge.innerText = `✅ Loaded ${excelData.length} Rows Successfully`;
+            statusBadge.className = "status-badge status-success";
+        };
+        reader.readAsArrayBuffer(file);
+    });
+
+    function findSubOrderId(awbScanned) {
+        if (excelData.length === 0) return; 
+        const cleanAwb = String(awbScanned).trim().toUpperCase();
+        let foundSubId = null;
+        
+        for (let r = 0; r < excelData.length; r++) {
+            if (excelData[r].join("|||").toUpperCase().includes(cleanAwb)) {
+                if (excelData[r].length > 8) {
+                    foundSubId = String(excelData[r][8]).trim();
+                }
+                break; 
+            }
+        }
+        
+        const subIdBox = document.getElementById('subid');
+        if (foundSubId && foundSubId !== "undefined" && foundSubId !== "") {
+            subIdBox.value = foundSubId;
+            subIdBox.style.borderColor = "#4caf50"; 
+        } else {
+            subIdBox.value = "NOT FOUND";
+            subIdBox.style.borderColor = "#f44336"; 
+        }
+    }
+
+    function manualAwbCheck() { findSubOrderId(document.getElementById('awb').value); }
+
+    // --- UNIVERSAL SCANNER ---
+    async function startScanner(targetField) {
+        currentTarget = targetField;
+        document.getElementById('reader-container').style.display = 'block';
+        if (html5QrCode && html5QrCode.isScanning) await html5QrCode.stop();
+
+        html5QrCode = new Html5Qrcode("reader");
+        
+        // Settings optimized for mobile camera focus
+        const config = { fps: 20, qrbox: { width: 260, height: 160 } };
+
+        html5QrCode.start(
+            { facingMode: "environment" }, config,
+            (decodedText) => {
+                const text = String(decodedText).trim();
+                // Filter out long URLs if scanning for AWB
+                if (currentTarget === 'awb' && (text.includes('http') || text.includes('{'))) return;
+
+                new Audio('https://www.soundjay.com/buttons/beep-07.mp3').play();
+                document.getElementById(currentTarget).value = text;
+                if (currentTarget === 'awb') findSubOrderId(text);
+                stopScanner();
+            }
+        ).catch(err => alert("Camera Permission Required!"));
+    }
+
+    function stopScanner() {
+        if (html5QrCode) {
+            html5QrCode.stop().then(() => { 
+                document.getElementById('reader-container').style.display = 'none'; 
+            });
+        }
+    }
+
+    function copy(id) {
+        const field = document.getElementById(id);
+        if(!field.value || field.value.includes("NOT FOUND")) return;
+        
+        field.select();
+        field.setSelectionRange(0, 99999); // For mobile
+        navigator.clipboard.writeText(field.value);
+        
+        // Visual Feedback
+        const originalBg = field.style.background;
+        field.style.background = "#fff9c4";
+        setTimeout(() => { field.style.background = originalBg; }, 500);
+    }
+
+    function clearForm() {
+        document.getElementById('awb').value = '';
+        document.getElementById('subid').value = '';
+        document.getElementById('subid').style.borderColor = "#e0e0e0";
+        document.getElementById('pid').value = '';
+    }
+</script>
+</body>
+</html>
