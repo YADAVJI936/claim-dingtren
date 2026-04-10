@@ -22,7 +22,6 @@
             justify-content: center;
         }
 
-        /* Responsive Card */
         .app-card { 
             width: 100%;
             max-width: 500px; 
@@ -31,6 +30,7 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
             overflow: hidden; 
             margin-top: 10px;
+            margin-bottom: 20px;
         }
 
         .header { 
@@ -41,7 +41,6 @@
         }
         .header h2 { margin: 0; font-size: 22px; letter-spacing: 0.5px; }
 
-        /* Upload Section */
         .upload-section { 
             background: #fff5fa; 
             padding: 20px; 
@@ -68,8 +67,8 @@
             color: #555; 
         }
         .status-success { background: #e8f5e9; color: var(--success-green); border: 1px solid #a5d6a7; }
+        .status-warning { background: #fff3e0; color: #e65100; border: 1px solid #ffb74d; }
 
-        /* Camera Viewport - Optimized for Mobile */
         #reader-container { background: #000; display: none; position: relative; }
         #reader { width: 100%; }
         .close-cam { 
@@ -84,7 +83,6 @@
             text-transform: uppercase;
         }
 
-        /* Form Content */
         .content { padding: 20px; }
         .field-group { margin-bottom: 24px; }
         .field-group label { 
@@ -97,19 +95,21 @@
             letter-spacing: 1px;
         }
         
-        /* Inputs & Buttons */
         .input-row { display: flex; gap: 8px; margin-bottom: 10px; }
-        input[type="text"] { 
+        input[type="text"], select, textarea { 
             flex: 1; 
             padding: 14px; 
             border: 2px solid var(--border-color); 
             border-radius: 10px; 
-            font-size: 16px; /* Prevents auto-zoom on iPhone */
+            font-size: 16px; 
             font-family: 'Courier New', monospace; 
             background: #fafafa;
             transition: border 0.3s;
+            width: 100%;
+            box-sizing: border-box;
         }
-        input[type="text"]:focus { border-color: var(--meesho-purple); outline: none; background: #fff; }
+        input[type="text"]:focus, select:focus, textarea:focus { border-color: var(--meesho-purple); outline: none; background: #fff; }
+        textarea { font-family: 'Segoe UI', sans-serif; font-size: 13px; resize: vertical; min-height: 180px; }
 
         .btn-row { display: flex; gap: 10px; }
         button { 
@@ -132,16 +132,24 @@
         .btn-copy { background: #fce4ec; color: var(--meesho-purple); border: 1px solid var(--meesho-purple); }
         .btn-copy-sub { background: #e8f5e9; color: var(--success-green); border: 1px solid var(--success-green); width: 100%; }
 
-        .clear-btn { 
-            width: 100%; 
-            background: transparent; 
-            color: #999; 
-            margin-top: 20px; 
-            border: 1px dashed #ccc; 
-            font-size: 12px;
-        }
+        .btn-media { background: #fff; border: 2px solid var(--border-color); color: #555; }
+        
+        .radio-group { display: flex; gap: 15px; margin-bottom: 10px; }
+        .radio-group label { display: flex; align-items: center; gap: 5px; font-size: 14px; color: #333; text-transform: none; font-weight: bold; letter-spacing: normal; cursor: pointer; }
 
-        /* Desktop Adjustments */
+        .clear-btn { width: 100%; background: transparent; color: #999; margin-top: 20px; border: 1px dashed #ccc; font-size: 12px; }
+
+        /* NEW: AI Dashboard Styles */
+        .ai-dashboard { background: #fafafa; border: 1px solid #eee; border-radius: 10px; padding: 15px; margin-top: 10px; }
+        .ai-stats { display: flex; gap: 10px; margin-bottom: 15px; }
+        .stat-box { flex: 1; background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 10px; text-align: center; }
+        .stat-box h3 { margin: 0; font-size: 20px; color: var(--meesho-purple); }
+        .stat-box p { margin: 4px 0 0; font-size: 10px; color: #777; font-weight: bold; text-transform: uppercase; }
+        .history-list { max-height: 150px; overflow-y: auto; font-size: 11px; background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 5px; }
+        .history-item { padding: 8px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; }
+        .history-item:last-child { border-bottom: none; }
+        .btn-log { background: #2196F3; color: white; width: 100%; margin-bottom: 10px; }
+
         @media (min-width: 600px) {
             body { padding: 40px 20px; }
             .app-card { border-radius: 20px; }
@@ -176,6 +184,7 @@
                 <button class="btn-scan" onclick="startScanner('awb')">📷 SCAN AWB</button>
                 <button class="btn-copy" onclick="copy('awb')">COPY</button>
             </div>
+            <div id="duplicateWarning" style="color: #d32f2f; font-size: 11px; font-weight: bold; display: none; margin-top: 5px;">⚠️ AI Alert: You have already logged this AWB today!</div>
         </div>
 
         <div class="field-group">
@@ -197,16 +206,173 @@
             </div>
         </div>
 
-        <button class="clear-btn" onclick="clearForm()">🗑️ CLEAR FOR NEXT ORDER</button>
+        <div class="field-group" style="border-top: 1px dashed #ccc; padding-top: 20px;">
+            <label>4. Capture Claim Proof (Auto-Saves to Gallery)</label>
+            <div class="btn-row" id="media-buttons">
+                <button class="btn-media" onclick="openLiveCamera('photo')">📸 Start Camera (Photo)</button>
+                <button class="btn-media" onclick="openLiveCamera('video')">🎥 Start Camera (Video)</button>
+            </div>
+            
+            <div id="live-media-container" style="display: none; background: #000; margin-top: 10px; border-radius: 10px; overflow: hidden;">
+                <video id="live-media-feed" autoplay playsinline style="width: 100%; display: block; object-fit: cover; max-height: 300px;"></video>
+                <div style="padding: 10px; display: flex; gap: 8px; background: #222;">
+                    <button id="btn-capture-photo" style="display: none; background: var(--meesho-purple); color: white;" onclick="captureLivePhoto()">📸 CLICK & SAVE</button>
+                    <button id="btn-start-record" style="display: none; background: #d32f2f; color: white;" onclick="startLiveRecording()">🔴 REC</button>
+                    <button id="btn-stop-record" style="display: none; background: #4caf50; color: white;" onclick="stopLiveRecording()">⏹️ STOP & SAVE</button>
+                    <button style="background: #555; color: white;" onclick="closeLiveCamera()">❌ CANCEL</button>
+                </div>
+            </div>
+
+            <div id="mediaStatus" style="font-size: 11px; color: #666; margin-top: 5px; text-align: center;">Ready to capture...</div>
+        </div>
+
+        <div class="field-group" style="border-top: 1px dashed #ccc; padding-top: 20px;">
+            <label>5. Claim Ticket Generator</label>
+            
+            <div class="radio-group">
+                <label><input type="radio" name="returnType" value="RTO" onchange="toggleReason(); generateTicket()"> RTO (Courier Return)</label>
+                <label><input type="radio" name="returnType" value="Customer Return" onchange="toggleReason(); generateTicket()"> Customer Return</label>
+            </div>
+
+            <div id="reasonContainer" style="display: none; margin-bottom: 10px;">
+                <select id="returnReason" onchange="generateTicket()">
+                    <option value="" disabled selected>Select Customer Return Reason...</option>
+                    <option value="I have received wrong return">I have received wrong return</option>
+                    <option value="I have received damaged return">I have received damaged return</option>
+                    <option value="I have not received my Return/RTO shipment">I have not received my Return/RTO shipment</option>
+                    <option value="Item/s are missing in my return">Item/s are missing in my return</option>
+                    <option value="I have received a wrong barcoded package in RTO">I have received a wrong barcoded package in RTO</option>
+                    <option value="I have received used product as return">I have received used product as return</option>
+                    <option value="Return/RTO product not received but marked delivered">Return/RTO product not received but marked delivered - Need Proof of Delivery</option>
+                    <option value="Return/RTO Delivery Issue - False Attempt by Logistic Partner">Return/RTO Delivery Issue - False Attempt by Logistic Partner</option>
+                    <option value="I have received an RTO in a non-barcoded package">I have received an RTO in a non-barcoded package</option>
+                    <option value="Other Returns/RTO and Exchange related issue">Other Returns/RTO and Exchange related issue</option>
+                </select>
+            </div>
+
+            <textarea id="ticketMessage" placeholder="Your formatted ticket message will appear here..." readonly></textarea>
+            
+            <button class="btn-copy" style="width: 100%; margin-top: 8px;" onclick="copy('ticketMessage')">📝 COPY TICKET MESSAGE</button>
+        </div>
+
+        <div class="field-group" style="border-top: 1px dashed #ccc; padding-top: 20px;">
+            <label>6. AI Data Management Hub</label>
+            <button class="btn-log" onclick="logCurrentClaim()">💾 SAVE & LOG THIS CLAIM</button>
+            
+            <div class="ai-dashboard">
+                <div class="ai-stats">
+                    <div class="stat-box">
+                        <h3 id="stat-total">0</h3>
+                        <p>Total Saved</p>
+                    </div>
+                    <div class="stat-box">
+                        <h3 id="stat-rto">0</h3>
+                        <p>Total RTO</p>
+                    </div>
+                    <div class="stat-box">
+                        <h3 id="stat-cr">0</h3>
+                        <p>Total CR</p>
+                    </div>
+                </div>
+                <div style="font-size: 11px; font-weight: bold; color: #555; margin-bottom: 5px;">Recent Local History:</div>
+                <div class="history-list" id="history-container">
+                    <div style="padding: 10px; text-align: center; color: #999;">No claims logged yet.</div>
+                </div>
+                
+                <div class="btn-row" style="margin-top: 10px;">
+                    <button style="background: var(--success-green); color: white;" onclick="exportToCSV()">📊 Export CSV</button>
+                    <button style="background: #ffebee; color: #d32f2f; border: 1px solid #ffcdd2;" onclick="clearDatabase()">🗑️ Clear DB</button>
+                </div>
+            </div>
+        </div>
+
+        <button class="clear-btn" onclick="clearForm()">🗑️ CLEAR FIELDS FOR NEXT ORDER</button>
     </div>
 </div>
 
 <script>
+    window.onload = function() {
+        navigator.mediaDevices.enumerateDevices().catch(()=>console.log("Permission caching ready."));
+        updateDashboard(); // Load AI data on start
+    };
+
     let html5QrCode = null;
     let currentTarget = '';
     let excelData = []; 
 
-    // --- EXCEL LOGIC ---
+    // --- AI DATA MANAGEMENT ENGINE ---
+    let smartDB = JSON.parse(localStorage.getItem('meeshoSmartDB')) || [];
+
+    function checkDuplicate(awbCheck) {
+        const isDupe = smartDB.some(item => item.awb === awbCheck && item.awb !== "");
+        document.getElementById('duplicateWarning').style.display = isDupe ? 'block' : 'none';
+    }
+
+    function logCurrentClaim() {
+        const awb = document.getElementById('awb').value;
+        const subid = document.getElementById('subid').value;
+        
+        if (!awb) return alert("AI requires an AWB Number to log the claim.");
+        
+        if (smartDB.some(item => item.awb === awb)) {
+            return alert("AI Alert: This AWB is already saved in your database.");
+        }
+
+        const typeNode = document.querySelector('input[name="returnType"]:checked');
+        const type = typeNode ? typeNode.value : "Uncategorized";
+        const date = new Date().toLocaleString();
+
+        const claimRecord = { date, awb, subid, type };
+        smartDB.push(claimRecord);
+        localStorage.setItem('meeshoSmartDB', JSON.stringify(smartDB));
+        
+        new Audio('https://www.soundjay.com/buttons/button-09.mp3').play();
+        updateDashboard();
+        clearForm(); // Auto-clear fields after successful save
+    }
+
+    function updateDashboard() {
+        document.getElementById('stat-total').innerText = smartDB.length;
+        document.getElementById('stat-rto').innerText = smartDB.filter(i => i.type === 'RTO').length;
+        document.getElementById('stat-cr').innerText = smartDB.filter(i => i.type === 'Customer Return').length;
+
+        const container = document.getElementById('history-container');
+        if (smartDB.length === 0) {
+            container.innerHTML = `<div style="padding: 10px; text-align: center; color: #999;">No claims logged yet.</div>`;
+            return;
+        }
+
+        container.innerHTML = smartDB.slice().reverse().map(item => `
+            <div class="history-item">
+                <div><b>${item.awb}</b><br><span style="color:#888">${item.date}</span></div>
+                <div style="color: var(--meesho-purple); font-weight:bold">${item.type}</div>
+            </div>
+        `).join('');
+    }
+
+    function exportToCSV() {
+        if (smartDB.length === 0) return alert("No data to export.");
+        let csvContent = "data:text/csv;charset=utf-8,Date,AWB,Sub-Order ID,Return Type\n" 
+            + smartDB.map(e => `"${e.date}","${e.awb}","${e.subid}","${e.type}"`).join("\n");
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `Claim_Report_${new Date().toLocaleDateString().replace(/\//g,'-')}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function clearDatabase() {
+        if(confirm("Are you sure you want to permanently delete all logged claims from your device?")) {
+            smartDB = [];
+            localStorage.setItem('meeshoSmartDB', JSON.stringify(smartDB));
+            updateDashboard();
+            document.getElementById('duplicateWarning').style.display = 'none';
+        }
+    }
+
+    // --- STANDARD LOGIC ---
     document.getElementById('excelFile').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -226,7 +392,6 @@
         if (excelData.length === 0) return; 
         const cleanAwb = String(awbScanned).trim().toUpperCase();
         let foundSubId = null;
-        
         for (let r = 0; r < excelData.length; r++) {
             if (excelData[r].join("|||").toUpperCase().includes(cleanAwb)) {
                 if (excelData[r].length > 8) {
@@ -235,7 +400,6 @@
                 break; 
             }
         }
-        
         const subIdBox = document.getElementById('subid');
         if (foundSubId && foundSubId !== "undefined" && foundSubId !== "") {
             subIdBox.value = foundSubId;
@@ -244,31 +408,35 @@
             subIdBox.value = "NOT FOUND";
             subIdBox.style.borderColor = "#f44336"; 
         }
+        generateTicket(); 
     }
 
-    function manualAwbCheck() { findSubOrderId(document.getElementById('awb').value); }
+    function manualAwbCheck() { 
+        const val = document.getElementById('awb').value.trim();
+        findSubOrderId(val);
+        checkDuplicate(val); // Trigger AI check
+        generateTicket();
+    }
 
-    // --- UNIVERSAL SCANNER ---
     async function startScanner(targetField) {
         currentTarget = targetField;
         document.getElementById('reader-container').style.display = 'block';
         if (html5QrCode && html5QrCode.isScanning) await html5QrCode.stop();
 
         html5QrCode = new Html5Qrcode("reader");
-        
-        // Settings optimized for mobile camera focus
         const config = { fps: 20, qrbox: { width: 260, height: 160 } };
-
         html5QrCode.start(
             { facingMode: "environment" }, config,
             (decodedText) => {
                 const text = String(decodedText).trim();
-                // Filter out long URLs if scanning for AWB
                 if (currentTarget === 'awb' && (text.includes('http') || text.includes('{'))) return;
-
                 new Audio('https://www.soundjay.com/buttons/beep-07.mp3').play();
                 document.getElementById(currentTarget).value = text;
-                if (currentTarget === 'awb') findSubOrderId(text);
+                if (currentTarget === 'awb') {
+                    findSubOrderId(text);
+                    checkDuplicate(text); // Trigger AI check
+                }
+                generateTicket();
                 stopScanner();
             }
         ).catch(err => alert("Camera Permission Required!"));
@@ -285,15 +453,150 @@
     function copy(id) {
         const field = document.getElementById(id);
         if(!field.value || field.value.includes("NOT FOUND")) return;
-        
         field.select();
-        field.setSelectionRange(0, 99999); // For mobile
+        field.setSelectionRange(0, 99999);
         navigator.clipboard.writeText(field.value);
-        
-        // Visual Feedback
         const originalBg = field.style.background;
         field.style.background = "#fff9c4";
         setTimeout(() => { field.style.background = originalBg; }, 500);
+    }
+
+    // --- IN-APP LIVE CAMERA ENGINE ---
+    let liveMediaStream = null;
+    let liveMediaRecorder = null;
+    let recordedChunks = [];
+    let sizeCheckInterval = null;
+
+    async function openLiveCamera(mode) {
+        document.getElementById('media-buttons').style.display = 'none';
+        document.getElementById('live-media-container').style.display = 'block';
+        document.getElementById('mediaStatus').innerText = "Starting live camera...";
+        document.getElementById('mediaStatus').style.color = "#666";
+        
+        document.getElementById('btn-capture-photo').style.display = mode === 'photo' ? 'block' : 'none';
+        document.getElementById('btn-start-record').style.display = mode === 'video' ? 'block' : 'none';
+        document.getElementById('btn-stop-record').style.display = 'none';
+
+        try {
+            liveMediaStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: "environment" },
+                audio: mode === 'video' 
+            });
+            const videoElement = document.getElementById('live-media-feed');
+            videoElement.srcObject = liveMediaStream;
+            videoElement.muted = true; 
+            document.getElementById('mediaStatus').innerText = "Live camera active. Ready.";
+        } catch (err) {
+            alert("Camera access denied. Please ensure you are running this app on a secure connection or have allowed permissions.");
+            closeLiveCamera();
+        }
+    }
+
+    function closeLiveCamera() {
+        if (liveMediaStream) {
+            liveMediaStream.getTracks().forEach(track => track.stop());
+            liveMediaStream = null;
+        }
+        if (sizeCheckInterval) clearInterval(sizeCheckInterval);
+        if (liveMediaRecorder && liveMediaRecorder.state !== "inactive") {
+            liveMediaRecorder.stop();
+        }
+        document.getElementById('live-media-feed').srcObject = null;
+        document.getElementById('live-media-container').style.display = 'none';
+        document.getElementById('media-buttons').style.display = 'flex';
+    }
+
+    function captureLivePhoto() {
+        const video = document.getElementById('live-media-feed');
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        canvas.toBlob((blob) => {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const awbVal = document.getElementById('awb').value || "Claim";
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            a.download = `Photo_${awbVal}_${timestamp}.jpg`;
+            a.href = url;
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            new Audio('https://www.soundjay.com/buttons/beep-07.mp3').play();
+            document.getElementById('mediaStatus').innerHTML = `✅ Photo saved to Gallery/Downloads!`;
+            document.getElementById('mediaStatus').style.color = "#2e7d32";
+            closeLiveCamera();
+        }, 'image/jpeg', 0.95);
+    }
+
+    function startLiveRecording() {
+        recordedChunks = [];
+        try {
+            liveMediaRecorder = new MediaRecorder(liveMediaStream);
+        } catch (e) {
+            alert("Video recording is not supported on this browser.");
+            return;
+        }
+
+        document.getElementById('btn-start-record').style.display = 'none';
+        document.getElementById('btn-stop-record').style.display = 'block';
+        document.getElementById('mediaStatus').innerHTML = `🔴 Recording... (Max 24MB limit)`;
+        document.getElementById('mediaStatus').style.color = "#d32f2f";
+
+        liveMediaRecorder.ondataavailable = function(event) {
+            if (event.data.size > 0) {
+                recordedChunks.push(event.data);
+            }
+        };
+
+        liveMediaRecorder.start(1000);
+
+        sizeCheckInterval = setInterval(() => {
+            const tempBlob = new Blob(recordedChunks);
+            const sizeMB = tempBlob.size / (1024 * 1024);
+            if (sizeMB >= 24) {
+                stopLiveRecording(true);
+            }
+        }, 1000);
+    }
+
+    function stopLiveRecording(limitHit = false) {
+        if (liveMediaRecorder && liveMediaRecorder.state !== "inactive") {
+            liveMediaRecorder.stop();
+        }
+        clearInterval(sizeCheckInterval);
+        
+        setTimeout(() => {
+            const finalBlob = new Blob(recordedChunks, { type: 'video/mp4' });
+            const finalSizeMB = (finalBlob.size / (1024 * 1024)).toFixed(2);
+            
+            const url = URL.createObjectURL(finalBlob);
+            const a = document.createElement('a');
+            const awbVal = document.getElementById('awb').value || "Claim";
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            a.download = `Video_${awbVal}_${timestamp}.mp4`;
+            a.href = url;
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            new Audio('https://www.soundjay.com/buttons/beep-07.mp3').play();
+            
+            if (limitHit) {
+                document.getElementById('mediaStatus').innerHTML = `✅ Reached 24MB limit. Video saved (${finalSizeMB} MB).`;
+            } else {
+                document.getElementById('mediaStatus').innerHTML = `✅ Video saved to Gallery/Downloads (${finalSizeMB} MB).`;
+            }
+            document.getElementById('mediaStatus').style.color = "#2e7d32";
+            closeLiveCamera();
+        }, 500); 
     }
 
     function clearForm() {
@@ -301,7 +604,76 @@
         document.getElementById('subid').value = '';
         document.getElementById('subid').style.borderColor = "#e0e0e0";
         document.getElementById('pid').value = '';
+        document.getElementById('ticketMessage').value = '';
+        document.getElementById('returnReason').selectedIndex = 0;
+        document.getElementById('mediaStatus').innerText = "Ready to capture...";
+        document.getElementById('mediaStatus').style.color = "#666";
+        document.getElementById('duplicateWarning').style.display = 'none';
+        closeLiveCamera(); 
+        
+        const rtoRadio = document.querySelector('input[name="returnType"][value="RTO"]');
+        const crRadio = document.querySelector('input[name="returnType"][value="Customer Return"]');
+        if(rtoRadio) rtoRadio.checked = false;
+        if(crRadio) crRadio.checked = false;
+        document.getElementById('reasonContainer').style.display = 'none';
     }
+
+    function toggleReason() {
+        const rtoRadio = document.querySelector('input[name="returnType"][value="RTO"]');
+        const reasonContainer = document.getElementById('reasonContainer');
+        if (rtoRadio && rtoRadio.checked) {
+            reasonContainer.style.display = 'none';
+        } else {
+            reasonContainer.style.display = 'block';
+        }
+    }
+
+    function generateTicket() {
+        const awb = document.getElementById('awb').value || "[Scan AWB]";
+        const subId = document.getElementById('subid').value || "[Scan to Auto-fill]";
+        
+        const typeNode = document.querySelector('input[name="returnType"]:checked');
+        const returnType = typeNode ? typeNode.value : null;
+        
+        let detailedIssue = "";
+
+        if (!returnType) {
+            detailedIssue = "Please select 'RTO' or 'Customer Return' to generate the ticket message.";
+        } 
+        else if (returnType === "RTO") {
+            detailedIssue = `Issue: RTO Shipment Problem\n\nDescription:\n1. Packaging standard: The product was dispatched in a high-burst-strength 3-ply corrugated box.\n2. Product Nature: High-grade plastic bangle box.\n3. Evidence: I have received an RTO package, but upon opening it on camera, it was found to be damaged/tampered due to courier mishandling during transit.\n\nRequest: Please review the attached unboxing video and approve this claim under the Seller Protection Fund (SPF) due to clear logistic negligence.`;
+        } 
+        else if (returnType === "Customer Return") {
+            const reasonDrop = document.getElementById('returnReason');
+            const reason = reasonDrop.value;
+
+            if (!reason) {
+                detailedIssue = "Please select a Customer Return reason from the dropdown.";
+            } else {
+                switch(reason) {
+                    case "I have received damaged return":
+                        detailedIssue = `Issue: Received Damaged Return\n\nDescription:\n1. Packaging standard: The product was shipped in a high-burst-strength 3-ply corrugated box (industry standard).\n2. Product Nature: This is a high-grade plastic bangle box.\n3. Evidence of Negligence: The cracks/breaks occurred due to extreme external pressure and courier mishandling during transit, which exceeded the protection of a 3-ply box.\n4. Compliance: I have followed all Meesho packaging guidelines. The unboxing video clearly shows the outer package was damaged/mishandled.\n\nRequest: Please approve this claim under the Seller Protection Fund (SPF) as this is a clear case of courier negligence.`;
+                        break;
+                    case "I have received wrong return":
+                        detailedIssue = `Issue: Received Wrong Return\n\nDescription:\nInstead of the high-grade plastic bangle box that was originally dispatched, I have received a completely different and incorrect item. The attached unboxing video clearly demonstrates the intact return packaging being opened to reveal the fraudulent item inside.\n\nRequest: This is a clear case of fraud. Please investigate and approve my SPF claim.`;
+                        break;
+                    case "Item/s are missing in my return":
+                        detailedIssue = `Issue: Items Missing in Return\n\nDescription:\nThe returned package was received partially empty. Some plastic bangle box units from the original order are missing. The continuous unboxing video clearly shows the sealed package being opened and the exact deficit in contents.\n\nRequest: Please process the SPF claim for the missing units based on the attached video evidence.`;
+                        break;
+                    case "I have received used product as return":
+                        detailedIssue = `Issue: Received Used Product\n\nDescription:\nThe customer has returned a used/degraded item instead of the brand new plastic bangle box that was dispatched. This violates the return policy. The unboxing video is attached for your reference.\n\nRequest: Please approve the SPF claim for this unacceptable customer return.`;
+                        break;
+                    default:
+                        detailedIssue = `Issue: ${reason}\n\nDescription:\nI am raising an issue regarding this order. I have securely packaged the original plastic bangle box following all Meesho guidelines. Please review the specific details in the attached unboxing video/photos which serve as clear evidence of the issue at hand.\n\nRequest: Kindly investigate this matter and process the SPF claim accordingly.`;
+                }
+            }
+        }
+
+        const template = `Dear Meesho Support,\n\nAWB Number: ${awb}\nSub-Order ID: ${subId}\n\n${detailedIssue}`;
+        document.getElementById('ticketMessage').value = template;
+    }
+    
+    document.getElementById('pid').addEventListener('input', generateTicket);
 </script>
 </body>
 </html>
