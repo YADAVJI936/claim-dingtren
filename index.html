@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Meesho Universal Offline Hub</title>
-    <script src="https://unpkg.com/html5-qrcode"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <title>Meesho Universal Offline Hub v2</title>
+    <script src="html5-qrcode.min.js"></script>
+    <script src="xlsx.full.min.js"></script>
     <style>
         :root {
             --meesho-purple: #82004f;
+            --meesho-light: #a31569;
             --success-green: #2e7d32;
             --border-color: #e0e0e0;
         }
@@ -27,23 +28,25 @@
             max-width: 500px; 
             background: white; 
             border-radius: 16px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.12); 
             overflow: hidden; 
-            margin-top: 10px;
+            margin-top: 5px;
             margin-bottom: 20px;
+            border: 1px solid #eaeaea;
         }
 
         .header { 
-            background: var(--meesho-purple); 
+            background: linear-gradient(135deg, var(--meesho-purple), var(--meesho-light)); 
             color: white; 
-            padding: 20px; 
+            padding: 18px; 
             text-align: center; 
         }
-        .header h2 { margin: 0; font-size: 22px; letter-spacing: 0.5px; }
+        .header h2 { margin: 0; font-size: 20px; letter-spacing: 0.5px; display: flex; justify-content: center; align-items: center; gap: 10px;}
+        .v2-badge { background: #ffc107; color: #000; font-size: 10px; font-weight: 900; padding: 3px 8px; border-radius: 12px; letter-spacing: 1px;}
 
         .upload-section { 
             background: #fff5fa; 
-            padding: 20px; 
+            padding: 15px; 
             text-align: center; 
             border-bottom: 1px solid #ffdaed; 
         }
@@ -51,120 +54,116 @@
             font-weight: bold; 
             color: var(--meesho-purple); 
             display: block; 
-            margin-bottom: 12px; 
-            font-size: 14px; 
+            margin-bottom: 10px; 
+            font-size: 13px; 
         }
         input[type="file"] { font-size: 12px; width: 100%; }
 
         .status-badge { 
             display: inline-block; 
-            margin-top: 12px; 
-            padding: 6px 16px; 
+            margin-top: 10px; 
+            padding: 5px 14px; 
             border-radius: 20px; 
-            font-size: 12px; 
-            font-weight: 600; 
+            font-size: 11px; 
+            font-weight: 700; 
             background: #eee; 
             color: #555; 
         }
         .status-success { background: #e8f5e9; color: var(--success-green); border: 1px solid #a5d6a7; }
         .status-warning { background: #fff3e0; color: #e65100; border: 1px solid #ffb74d; }
 
-        #reader-container { background: #000; display: none; position: relative; }
+        #reader-container { background: #000; display: none; position: relative; border-radius: 8px; margin: 10px; overflow: hidden;}
         #reader { width: 100%; }
         .close-cam { 
             width: 100%; 
             background: #333; 
             color: white; 
             border: none; 
-            padding: 15px; 
+            padding: 12px; 
             cursor: pointer; 
             font-weight: bold; 
-            font-size: 14px; 
+            font-size: 12px; 
             text-transform: uppercase;
         }
 
-        .content { padding: 20px; }
-        .field-group { margin-bottom: 24px; }
+        .content { padding: 15px; }
+        .field-group { margin-bottom: 20px; }
         .field-group label { 
             display: block; 
             font-size: 11px; 
             font-weight: 800; 
-            color: #888; 
-            margin-bottom: 8px; 
+            color: #777; 
+            margin-bottom: 6px; 
             text-transform: uppercase; 
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
         
-        .input-row { display: flex; gap: 8px; margin-bottom: 10px; }
+        .input-row { display: flex; gap: 8px; margin-bottom: 8px; }
         input[type="text"], select, textarea { 
             flex: 1; 
-            padding: 14px; 
+            padding: 12px; 
             border: 2px solid var(--border-color); 
-            border-radius: 10px; 
-            font-size: 16px; 
+            border-radius: 8px; 
+            font-size: 14px; 
             font-family: 'Courier New', monospace; 
             background: #fafafa;
-            transition: border 0.3s;
+            transition: all 0.3s ease;
             width: 100%;
             box-sizing: border-box;
         }
-        input[type="text"]:focus, select:focus, textarea:focus { border-color: var(--meesho-purple); outline: none; background: #fff; }
-        textarea { font-family: 'Segoe UI', sans-serif; font-size: 13px; resize: vertical; min-height: 180px; }
+        input[type="text"]:focus, select:focus, textarea:focus { border-color: var(--meesho-purple); outline: none; background: #fff; box-shadow: 0 0 0 3px rgba(130, 0, 79, 0.1);}
+        textarea { font-family: 'Segoe UI', sans-serif; font-size: 13px; resize: vertical; min-height: 120px; }
 
-        .btn-row { display: flex; gap: 10px; }
+        .btn-row { display: flex; gap: 8px; }
         button { 
             flex: 1; 
-            padding: 14px; 
+            padding: 12px; 
             border: none; 
-            border-radius: 10px; 
+            border-radius: 8px; 
             font-weight: bold; 
             cursor: pointer; 
-            font-size: 13px; 
-            transition: transform 0.1s, opacity 0.2s;
+            font-size: 12px; 
+            transition: transform 0.1s, opacity 0.2s, background 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 5px;
         }
-        button:active { transform: scale(0.98); opacity: 0.9; }
+        button:active { transform: scale(0.96); opacity: 0.9; }
 
         .btn-scan { background: var(--meesho-purple); color: white; box-shadow: 0 4px 10px rgba(130, 0, 79, 0.2); }
         .btn-copy { background: #fce4ec; color: var(--meesho-purple); border: 1px solid var(--meesho-purple); }
         .btn-copy-sub { background: #e8f5e9; color: var(--success-green); border: 1px solid var(--success-green); width: 100%; }
-
         .btn-media { background: #fff; border: 2px solid var(--border-color); color: #555; }
         
         .radio-group { display: flex; gap: 15px; margin-bottom: 10px; }
-        .radio-group label { display: flex; align-items: center; gap: 5px; font-size: 14px; color: #333; text-transform: none; font-weight: bold; letter-spacing: normal; cursor: pointer; }
+        .radio-group label { display: flex; align-items: center; gap: 5px; font-size: 13px; color: #333; font-weight: bold; cursor: pointer; }
 
-        .clear-btn { width: 100%; background: transparent; color: #999; margin-top: 20px; border: 1px dashed #ccc; font-size: 12px; }
+        .clear-btn { width: 100%; background: transparent; color: #999; margin-top: 15px; border: 1px dashed #ccc; font-size: 12px; }
 
-        /* NEW: AI Dashboard Styles */
         .ai-dashboard { background: #fafafa; border: 1px solid #eee; border-radius: 10px; padding: 15px; margin-top: 10px; }
         .ai-stats { display: flex; gap: 10px; margin-bottom: 15px; }
-        .stat-box { flex: 1; background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 10px; text-align: center; }
-        .stat-box h3 { margin: 0; font-size: 20px; color: var(--meesho-purple); }
-        .stat-box p { margin: 4px 0 0; font-size: 10px; color: #777; font-weight: bold; text-transform: uppercase; }
-        .history-list { max-height: 150px; overflow-y: auto; font-size: 11px; background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 5px; }
-        .history-item { padding: 8px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; }
+        .stat-box { flex: 1; background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 10px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02);}
+        .stat-box h3 { margin: 0; font-size: 18px; color: var(--meesho-purple); }
+        .stat-box p { margin: 4px 0 0; font-size: 9px; color: #777; font-weight: bold; text-transform: uppercase; }
+        .history-list { max-height: 120px; overflow-y: auto; font-size: 11px; background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 5px; }
+        .history-item { padding: 8px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;}
         .history-item:last-child { border-bottom: none; }
         .btn-log { background: #2196F3; color: white; width: 100%; margin-bottom: 10px; }
 
-        @media (min-width: 600px) {
-            body { padding: 40px 20px; }
-            .app-card { border-radius: 20px; }
-        }
+        #btn-push-meesho { width: 100%; margin-top: 10px; background: #2e7d32; color: white; padding: 15px; border-radius: 8px; font-weight: 900; border: none; font-size: 14px; box-shadow: 0 4px 12px rgba(46,125,50,0.3); cursor: pointer; transition: background 0.3s; }
+        #btn-push-meesho:hover { background: #1b5e20; }
     </style>
 </head>
 <body>
 
 <div class="app-card">
     <div class="header">
-        <h2>Universal Claim Hub</h2>
+        <h2>Claim Hub Pro <span class="v2-badge">v2.0 AI</span></h2>
     </div>
 
     <div class="upload-section">
-        <label>📁 UPLOAD RETURNS REPORT (EXCEL/CSV)</label>
+        <label>📁 UPLOAD CSV REPORT</label>
         <input type="file" id="excelFile" accept=".csv, .xlsx, .xls">
         <div id="fileStatus" class="status-badge">No file loaded</div>
     </div>
@@ -176,102 +175,86 @@
 
     <div class="content">
         <div class="field-group">
-            <label>1. AWB Number (Scan Barcode/QR)</label>
+            <label>1. AWB Number</label>
             <div class="input-row">
-                <input type="text" id="awb" placeholder="Awaiting scan..." oninput="manualAwbCheck()">
+                <input type="text" id="awb" placeholder="Scan or Type..." oninput="manualAwbCheck()">
             </div>
             <div class="btn-row">
-                <button class="btn-scan" onclick="startScanner('awb')">📷 SCAN AWB</button>
+                <button class="btn-scan" onclick="startScanner('awb')">📷 SCAN</button>
                 <button class="btn-copy" onclick="copy('awb')">COPY</button>
             </div>
-            <div id="duplicateWarning" style="color: #d32f2f; font-size: 11px; font-weight: bold; display: none; margin-top: 5px;">⚠️ AI Alert: You have already logged this AWB today!</div>
+            <div id="duplicateWarning" style="color: #d32f2f; font-size: 11px; font-weight: bold; display: none; margin-top: 5px; background: #ffebee; padding: 5px; border-radius: 4px;">⚠️ AI Alert: Duplicate AWB Logged Today!</div>
         </div>
 
         <div class="field-group">
-            <label>2. Sub-Order ID (Direct from Column I)</label>
+            <label>2. Sub-Order ID</label>
             <div class="input-row">
-                <input type="text" id="subid" placeholder="Auto-fills from file..." readonly style="background: #f0fdf4;">
+                <input type="text" id="subid" placeholder="Auto-fills..." readonly style="background: #f0fdf4;">
             </div>
-            <button class="btn-copy-sub" onclick="copy('subid')">✅ COPY SUB-ORDER ID</button>
+            <button class="btn-copy-sub" onclick="copy('subid')">✅ COPY ID</button>
         </div>
 
-        <div class="field-group">
-            <label>3. Packet ID (Scan QR/Barcode)</label>
-            <div class="input-row">
-                <input type="text" id="pid" placeholder="Awaiting scan...">
-            </div>
-            <div class="btn-row">
-                <button class="btn-scan" onclick="startScanner('pid')" style="background: #444;">📷 SCAN PACKET</button>
-                <button class="btn-copy" onclick="copy('pid')">COPY</button>
-            </div>
-        </div>
-
-        <div class="field-group" style="border-top: 1px dashed #ccc; padding-top: 20px;">
-            <label>4. Capture Claim Proof (Auto-Saves to Gallery)</label>
+        <div class="field-group" style="border-top: 1px dashed #ccc; padding-top: 15px;">
+            <label>3. Capture Proof (Saves to PC)</label>
             <div class="btn-row" id="media-buttons">
-                <button class="btn-media" onclick="openLiveCamera('photo')">📸 Start Camera (Photo)</button>
-                <button class="btn-media" onclick="openLiveCamera('video')">🎥 Start Camera (Video)</button>
+                <button class="btn-media" onclick="openLiveCamera('photo')">📸 Photo</button>
+                <button class="btn-media" onclick="openLiveCamera('video')">🎥 Video (23MB)</button>
             </div>
             
-            <div id="live-media-container" style="display: none; background: #000; margin-top: 10px; border-radius: 10px; overflow: hidden;">
-                <video id="live-media-feed" autoplay playsinline style="width: 100%; display: block; object-fit: cover; max-height: 300px;"></video>
-                <div style="padding: 10px; display: flex; gap: 8px; background: #222;">
-                    <button id="btn-capture-photo" style="display: none; background: var(--meesho-purple); color: white;" onclick="captureLivePhoto()">📸 CLICK & SAVE</button>
+            <div id="live-media-container" style="display: none; background: #000; margin-top: 10px; border-radius: 8px; overflow: hidden;">
+                <video id="live-media-feed" autoplay playsinline style="width: 100%; display: block; object-fit: cover; max-height: 200px;"></video>
+                <div style="padding: 10px; display: flex; gap: 5px; background: #222;">
+                    <button id="btn-capture-photo" style="display: none; background: var(--meesho-purple); color: white;" onclick="captureLivePhoto()">📸 SAVE</button>
                     <button id="btn-start-record" style="display: none; background: #d32f2f; color: white;" onclick="startLiveRecording()">🔴 REC</button>
-                    <button id="btn-stop-record" style="display: none; background: #4caf50; color: white;" onclick="stopLiveRecording()">⏹️ STOP & SAVE</button>
-                    <button style="background: #555; color: white;" onclick="closeLiveCamera()">❌ CANCEL</button>
+                    <button id="btn-stop-record" style="display: none; background: #4caf50; color: white;" onclick="stopLiveRecording(false)">⏹️ STOP</button>
+                    <button style="background: #555; color: white;" onclick="closeLiveCamera()">❌</button>
                 </div>
             </div>
 
-            <div id="mediaStatus" style="font-size: 11px; color: #666; margin-top: 5px; text-align: center;">Ready to capture...</div>
+            <div id="mediaStatus" style="font-size: 12px; font-weight: bold; color: #666; margin-top: 8px; text-align: center; background: #eee; padding: 6px; border-radius: 6px;">Ready to capture...</div>
         </div>
 
-        <div class="field-group" style="border-top: 1px dashed #ccc; padding-top: 20px;">
-            <label>5. Claim Ticket Generator</label>
+        <div class="field-group" style="border-top: 1px dashed #ccc; padding-top: 15px;">
+            <label>4. AI Ticket Generator</label>
             
             <div class="radio-group">
-                <label><input type="radio" name="returnType" value="RTO" onchange="toggleReason(); generateTicket()"> RTO (Courier Return)</label>
+                <label><input type="radio" name="returnType" value="RTO" onchange="toggleReason(); generateTicket()"> RTO (Courier)</label>
                 <label><input type="radio" name="returnType" value="Customer Return" onchange="toggleReason(); generateTicket()"> Customer Return</label>
             </div>
 
             <div id="reasonContainer" style="display: none; margin-bottom: 10px;">
-                <select id="returnReason" onchange="generateTicket()">
+                <select id="returnReason" onchange="generateTicket()" style="font-size:12px; padding:10px;">
                     <option value="" disabled selected>Select Customer Return Reason...</option>
-                    <option value="I have received wrong return">I have received wrong return</option>
-                    <option value="I have received damaged return">I have received damaged return</option>
-                    <option value="I have not received my Return/RTO shipment">I have not received my Return/RTO shipment</option>
-                    <option value="Item/s are missing in my return">Item/s are missing in my return</option>
-                    <option value="I have received a wrong barcoded package in RTO">I have received a wrong barcoded package in RTO</option>
-                    <option value="I have received used product as return">I have received used product as return</option>
-                    <option value="Return/RTO product not received but marked delivered">Return/RTO product not received but marked delivered - Need Proof of Delivery</option>
-                    <option value="Return/RTO Delivery Issue - False Attempt by Logistic Partner">Return/RTO Delivery Issue - False Attempt by Logistic Partner</option>
-                    <option value="I have received an RTO in a non-barcoded package">I have received an RTO in a non-barcoded package</option>
-                    <option value="Other Returns/RTO and Exchange related issue">Other Returns/RTO and Exchange related issue</option>
+                    <option value="I have received damaged return">Received damaged return</option>
+                    <option value="I have received wrong return">Received wrong return</option>
+                    <option value="Item/s are missing in my return">Item/s missing</option>
+                    <option value="I have received used product as return">Received used product</option>
+                    <option value="Other Returns/RTO and Exchange related issue">Other Issue</option>
                 </select>
             </div>
 
-            <textarea id="ticketMessage" placeholder="Your formatted ticket message will appear here..." readonly></textarea>
+            <textarea id="ticketMessage" placeholder="AI formatted message will appear here..." readonly></textarea>
             
-            <button class="btn-copy" style="width: 100%; margin-top: 8px;" onclick="copy('ticketMessage')">📝 COPY TICKET MESSAGE</button>
+            <button id="btn-push-meesho" onclick="pushToMeeshoTab()">⚡ AUTO-FILL IN MEESHO TAB ⚡</button>
         </div>
 
-        <div class="field-group" style="border-top: 1px dashed #ccc; padding-top: 20px;">
-            <label>6. AI Data Management Hub</label>
-            <button class="btn-log" onclick="logCurrentClaim()">💾 SAVE & LOG THIS CLAIM</button>
+        <div class="field-group" style="border-top: 1px dashed #ccc; padding-top: 15px;">
+            <label>5. AI Daily Log</label>
+            <button class="btn-log" onclick="logCurrentClaim()">💾 SAVE & CLEAR FOR NEXT</button>
             
             <div class="ai-dashboard">
                 <div class="ai-stats">
                     <div class="stat-box">
                         <h3 id="stat-total">0</h3>
-                        <p>Total Saved</p>
+                        <p>Total</p>
                     </div>
                     <div class="stat-box">
                         <h3 id="stat-rto">0</h3>
-                        <p>Total RTO</p>
+                        <p>RTO</p>
                     </div>
                     <div class="stat-box">
                         <h3 id="stat-cr">0</h3>
-                        <p>Total CR</p>
+                        <p>CR</p>
                     </div>
                 </div>
                 <div style="font-size: 11px; font-weight: bold; color: #555; margin-bottom: 5px;">Recent Local History:</div>
@@ -286,93 +269,21 @@
             </div>
         </div>
 
-        <button class="clear-btn" onclick="clearForm()">🗑️ CLEAR FIELDS FOR NEXT ORDER</button>
+        <button class="clear-btn" onclick="clearForm()">🗑️ CLEAR FIELDS MANUALLY</button>
     </div>
 </div>
 
 <script>
     window.onload = function() {
-        navigator.mediaDevices.enumerateDevices().catch(()=>console.log("Permission caching ready."));
-        updateDashboard(); // Load AI data on start
+        updateDashboard(); 
+        document.getElementById('awb').focus(); // Auto-focus AWB on load
     };
 
+    // --- QR AND EXCEL LOGIC ---
     let html5QrCode = null;
     let currentTarget = '';
     let excelData = []; 
 
-    // --- AI DATA MANAGEMENT ENGINE ---
-    let smartDB = JSON.parse(localStorage.getItem('meeshoSmartDB')) || [];
-
-    function checkDuplicate(awbCheck) {
-        const isDupe = smartDB.some(item => item.awb === awbCheck && item.awb !== "");
-        document.getElementById('duplicateWarning').style.display = isDupe ? 'block' : 'none';
-    }
-
-    function logCurrentClaim() {
-        const awb = document.getElementById('awb').value;
-        const subid = document.getElementById('subid').value;
-        
-        if (!awb) return alert("AI requires an AWB Number to log the claim.");
-        
-        if (smartDB.some(item => item.awb === awb)) {
-            return alert("AI Alert: This AWB is already saved in your database.");
-        }
-
-        const typeNode = document.querySelector('input[name="returnType"]:checked');
-        const type = typeNode ? typeNode.value : "Uncategorized";
-        const date = new Date().toLocaleString();
-
-        const claimRecord = { date, awb, subid, type };
-        smartDB.push(claimRecord);
-        localStorage.setItem('meeshoSmartDB', JSON.stringify(smartDB));
-        
-        new Audio('https://www.soundjay.com/buttons/button-09.mp3').play();
-        updateDashboard();
-        clearForm(); // Auto-clear fields after successful save
-    }
-
-    function updateDashboard() {
-        document.getElementById('stat-total').innerText = smartDB.length;
-        document.getElementById('stat-rto').innerText = smartDB.filter(i => i.type === 'RTO').length;
-        document.getElementById('stat-cr').innerText = smartDB.filter(i => i.type === 'Customer Return').length;
-
-        const container = document.getElementById('history-container');
-        if (smartDB.length === 0) {
-            container.innerHTML = `<div style="padding: 10px; text-align: center; color: #999;">No claims logged yet.</div>`;
-            return;
-        }
-
-        container.innerHTML = smartDB.slice().reverse().map(item => `
-            <div class="history-item">
-                <div><b>${item.awb}</b><br><span style="color:#888">${item.date}</span></div>
-                <div style="color: var(--meesho-purple); font-weight:bold">${item.type}</div>
-            </div>
-        `).join('');
-    }
-
-    function exportToCSV() {
-        if (smartDB.length === 0) return alert("No data to export.");
-        let csvContent = "data:text/csv;charset=utf-8,Date,AWB,Sub-Order ID,Return Type\n" 
-            + smartDB.map(e => `"${e.date}","${e.awb}","${e.subid}","${e.type}"`).join("\n");
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `Claim_Report_${new Date().toLocaleDateString().replace(/\//g,'-')}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
-
-    function clearDatabase() {
-        if(confirm("Are you sure you want to permanently delete all logged claims from your device?")) {
-            smartDB = [];
-            localStorage.setItem('meeshoSmartDB', JSON.stringify(smartDB));
-            updateDashboard();
-            document.getElementById('duplicateWarning').style.display = 'none';
-        }
-    }
-
-    // --- STANDARD LOGIC ---
     document.getElementById('excelFile').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -382,7 +293,7 @@
             const workbook = XLSX.read(data, {type: 'array'});
             excelData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {header: 1});
             const statusBadge = document.getElementById('fileStatus');
-            statusBadge.innerText = `✅ Loaded ${excelData.length} Rows Successfully`;
+            statusBadge.innerText = `✅ Loaded ${excelData.length} Rows`;
             statusBadge.className = "status-badge status-success";
         };
         reader.readAsArrayBuffer(file);
@@ -404,9 +315,11 @@
         if (foundSubId && foundSubId !== "undefined" && foundSubId !== "") {
             subIdBox.value = foundSubId;
             subIdBox.style.borderColor = "#4caf50"; 
+            subIdBox.style.backgroundColor = "#e8f5e9";
         } else {
             subIdBox.value = "NOT FOUND";
             subIdBox.style.borderColor = "#f44336"; 
+            subIdBox.style.backgroundColor = "#ffebee";
         }
         generateTicket(); 
     }
@@ -414,7 +327,7 @@
     function manualAwbCheck() { 
         const val = document.getElementById('awb').value.trim();
         findSubOrderId(val);
-        checkDuplicate(val); // Trigger AI check
+        checkDuplicate(val); 
         generateTicket();
     }
 
@@ -424,7 +337,7 @@
         if (html5QrCode && html5QrCode.isScanning) await html5QrCode.stop();
 
         html5QrCode = new Html5Qrcode("reader");
-        const config = { fps: 20, qrbox: { width: 260, height: 160 } };
+        const config = { fps: 20, qrbox: { width: 250, height: 150 } };
         html5QrCode.start(
             { facingMode: "environment" }, config,
             (decodedText) => {
@@ -434,12 +347,12 @@
                 document.getElementById(currentTarget).value = text;
                 if (currentTarget === 'awb') {
                     findSubOrderId(text);
-                    checkDuplicate(text); // Trigger AI check
+                    checkDuplicate(text);
                 }
                 generateTicket();
                 stopScanner();
             }
-        ).catch(err => alert("Camera Permission Required!"));
+        ).catch(err => alert("Camera Permission Required! Check Chrome site settings."));
     }
 
     function stopScanner() {
@@ -461,7 +374,7 @@
         setTimeout(() => { field.style.background = originalBg; }, 500);
     }
 
-    // --- IN-APP LIVE CAMERA ENGINE ---
+    // --- IN-APP LIVE CAMERA ENGINE (V2.0 23MB Tracker) ---
     let liveMediaStream = null;
     let liveMediaRecorder = null;
     let recordedChunks = [];
@@ -471,7 +384,8 @@
         document.getElementById('media-buttons').style.display = 'none';
         document.getElementById('live-media-container').style.display = 'block';
         document.getElementById('mediaStatus').innerText = "Starting live camera...";
-        document.getElementById('mediaStatus').style.color = "#666";
+        document.getElementById('mediaStatus').style.background = "#e3f2fd";
+        document.getElementById('mediaStatus').style.color = "#1565c0";
         
         document.getElementById('btn-capture-photo').style.display = mode === 'photo' ? 'block' : 'none';
         document.getElementById('btn-start-record').style.display = mode === 'video' ? 'block' : 'none';
@@ -487,7 +401,7 @@
             videoElement.muted = true; 
             document.getElementById('mediaStatus').innerText = "Live camera active. Ready.";
         } catch (err) {
-            alert("Camera access denied. Please ensure you are running this app on a secure connection or have allowed permissions.");
+            alert("Camera access denied. Please check your browser permissions.");
             closeLiveCamera();
         }
     }
@@ -504,6 +418,9 @@
         document.getElementById('live-media-feed').srcObject = null;
         document.getElementById('live-media-container').style.display = 'none';
         document.getElementById('media-buttons').style.display = 'flex';
+        document.getElementById('mediaStatus').innerText = "Ready to capture...";
+        document.getElementById('mediaStatus').style.background = "#eee";
+        document.getElementById('mediaStatus').style.color = "#666";
     }
 
     function captureLivePhoto() {
@@ -528,7 +445,8 @@
             URL.revokeObjectURL(url);
             
             new Audio('https://www.soundjay.com/buttons/beep-07.mp3').play();
-            document.getElementById('mediaStatus').innerHTML = `✅ Photo saved to Gallery/Downloads!`;
+            document.getElementById('mediaStatus').innerHTML = `✅ Photo saved to PC!`;
+            document.getElementById('mediaStatus').style.background = "#e8f5e9";
             document.getElementById('mediaStatus').style.color = "#2e7d32";
             closeLiveCamera();
         }, 'image/jpeg', 0.95);
@@ -545,7 +463,8 @@
 
         document.getElementById('btn-start-record').style.display = 'none';
         document.getElementById('btn-stop-record').style.display = 'block';
-        document.getElementById('mediaStatus').innerHTML = `🔴 Recording... (Max 24MB limit)`;
+        document.getElementById('mediaStatus').innerHTML = `🔴 REC: 0.00 MB / 23.00 MB`;
+        document.getElementById('mediaStatus').style.background = "#ffebee";
         document.getElementById('mediaStatus').style.color = "#d32f2f";
 
         liveMediaRecorder.ondataavailable = function(event) {
@@ -554,15 +473,19 @@
             }
         };
 
-        liveMediaRecorder.start(1000);
+        liveMediaRecorder.start(250); // Get chunks every 250ms for accurate tracking
 
+        // Limit Enforcer (Strictly 23MB)
         sizeCheckInterval = setInterval(() => {
             const tempBlob = new Blob(recordedChunks);
-            const sizeMB = tempBlob.size / (1024 * 1024);
-            if (sizeMB >= 24) {
-                stopLiveRecording(true);
+            const sizeMB = (tempBlob.size / (1024 * 1024)).toFixed(2);
+            
+            document.getElementById('mediaStatus').innerHTML = `🔴 REC: ${sizeMB} MB / 23.00 MB`;
+
+            if (sizeMB >= 23.00) {
+                stopLiveRecording(true); // limit hit
             }
-        }, 1000);
+        }, 250);
     }
 
     function stopLiveRecording(limitHit = false) {
@@ -590,24 +513,177 @@
             new Audio('https://www.soundjay.com/buttons/beep-07.mp3').play();
             
             if (limitHit) {
-                document.getElementById('mediaStatus').innerHTML = `✅ Reached 24MB limit. Video saved (${finalSizeMB} MB).`;
+                document.getElementById('mediaStatus').innerHTML = `✅ Saved strictly at 23MB limit. (${finalSizeMB} MB).`;
             } else {
-                document.getElementById('mediaStatus').innerHTML = `✅ Video saved to Gallery/Downloads (${finalSizeMB} MB).`;
+                document.getElementById('mediaStatus').innerHTML = `✅ Video saved to PC (${finalSizeMB} MB).`;
             }
+            document.getElementById('mediaStatus').style.background = "#e8f5e9";
             document.getElementById('mediaStatus').style.color = "#2e7d32";
             closeLiveCamera();
         }, 500); 
     }
 
+    // --- AI DATA VALIDATION & PUSH ---
+    async function pushToMeeshoTab() {
+        const awbText = document.getElementById('awb').value.trim();
+        const subIdText = document.getElementById('subid').value.trim();
+        const ticketText = document.getElementById('ticketMessage').value.trim();
+        const pushBtn = document.getElementById('btn-push-meesho');
+        
+        // AI Validation
+        if (!awbText || awbText.length < 5) return alert("⚠️ AI Validation: Please enter a valid AWB number first!");
+        if (!ticketText) return alert("⚠️ AI Validation: Please generate a ticket message first!");
+
+        // Loading state
+        const originalText = pushBtn.innerHTML;
+        pushBtn.innerHTML = "⏳ Pushing Data...";
+        pushBtn.style.background = "#555";
+
+        let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        
+        if (!tab || !tab.url.includes("meesho.com")) {
+            pushBtn.innerHTML = originalText;
+            pushBtn.style.background = "#2e7d32";
+            return alert("❌ Open the Meesho Support 'Create Ticket' page in the main browser window first!");
+        }
+
+        // Inject script
+        chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            func: (awb, subId, desc) => {
+                function setNativeValue(element, value) {
+                    const valueSetter = Object.getOwnPropertyDescriptor(element, 'value').set;
+                    const prototype = Object.getPrototypeOf(element);
+                    const prototypeValueSetter = Object.getOwnPropertyDescriptor(prototype, 'value').set;
+                    if (valueSetter && valueSetter !== prototypeValueSetter) prototypeValueSetter.call(element, value);
+                    else valueSetter.call(element, value);
+                    element.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+
+                let success = false;
+                document.querySelectorAll("input").forEach(input => {
+                    let hint = (input.placeholder + (input.parentElement ? input.parentElement.innerText : "")).toLowerCase();
+                    if (hint.includes("awb") || hint.includes("tracking")) { setNativeValue(input, awb); input.style.border = "3px solid #4caf50"; success = true; }
+                    if (hint.includes("sub") || hint.includes("order") || hint.includes("id")) { setNativeValue(input, subId); input.style.border = "3px solid #4caf50"; success = true; }
+                });
+
+                const textareas = document.querySelectorAll("textarea");
+                if (textareas.length > 0) { setNativeValue(textareas[0], desc); textareas[0].style.border = "3px solid #4caf50"; textareas[0].style.backgroundColor = "#f0fdf4"; success = true; }
+                
+                return success;
+            },
+            args: [awbText, subIdText, ticketText]
+        }, (res) => {
+            if (res && res[0] && res[0].result) {
+                new Audio('https://www.soundjay.com/buttons/button-09.mp3').play();
+                pushBtn.innerHTML = "✅ AUTO-FILLED!";
+                pushBtn.style.background = "#1b5e20";
+                setTimeout(() => {
+                    pushBtn.innerHTML = originalText;
+                    pushBtn.style.background = "#2e7d32";
+                }, 2000);
+            } else {
+                pushBtn.innerHTML = originalText;
+                pushBtn.style.background = "#2e7d32";
+                alert("⚠️ Couldn't find the text boxes. Are you on the 'Create Ticket' page?");
+            }
+        });
+    }
+
+    // --- AI DATA MANAGEMENT ENGINE ---
+    let smartDB = JSON.parse(localStorage.getItem('meeshoSmartDB')) || [];
+
+    function checkDuplicate(awbCheck) {
+        const isDupe = smartDB.some(item => item.awb === awbCheck && item.awb !== "");
+        document.getElementById('duplicateWarning').style.display = isDupe ? 'block' : 'none';
+        if (isDupe) {
+            document.getElementById('awb').style.borderColor = "#d32f2f";
+            document.getElementById('awb').style.backgroundColor = "#ffebee";
+        } else {
+            document.getElementById('awb').style.borderColor = "var(--border-color)";
+            document.getElementById('awb').style.backgroundColor = "#fafafa";
+        }
+    }
+
+    function logCurrentClaim() {
+        const awb = document.getElementById('awb').value;
+        const subid = document.getElementById('subid').value;
+        
+        if (!awb || awb.length < 5) return alert("⚠️ AI Alert: Requires a valid AWB Number to log the claim.");
+        
+        if (smartDB.some(item => item.awb === awb)) {
+            if(!confirm("⚠️ AI Alert: This AWB is already saved in your database. Log it again anyway?")) return;
+        }
+
+        const typeNode = document.querySelector('input[name="returnType"]:checked');
+        const type = typeNode ? typeNode.value : "Uncategorized";
+        const date = new Date().toLocaleString();
+
+        const claimRecord = { date, awb, subid, type };
+        smartDB.push(claimRecord);
+        localStorage.setItem('meeshoSmartDB', JSON.stringify(smartDB));
+        
+        new Audio('https://www.soundjay.com/buttons/beep-07.mp3').play();
+        updateDashboard();
+        clearForm(); 
+    }
+
+    function updateDashboard() {
+        document.getElementById('stat-total').innerText = smartDB.length;
+        document.getElementById('stat-rto').innerText = smartDB.filter(i => i.type === 'RTO').length;
+        document.getElementById('stat-cr').innerText = smartDB.filter(i => i.type === 'Customer Return').length;
+
+        const container = document.getElementById('history-container');
+        if (smartDB.length === 0) {
+            container.innerHTML = `<div style="padding: 10px; text-align: center; color: #999;">No claims logged yet.</div>`;
+            return;
+        }
+
+        container.innerHTML = smartDB.slice().reverse().map(item => `
+            <div class="history-item">
+                <div><b style="color: #333">${item.awb}</b><br><span style="color:#888; font-size:9px;">${item.date}</span></div>
+                <div style="color: var(--meesho-purple); font-weight:bold">${item.type}</div>
+            </div>
+        `).join('');
+    }
+
+    function exportToCSV() {
+        if (smartDB.length === 0) return alert("No data to export.");
+        let csvContent = "data:text/csv;charset=utf-8,Date,AWB,Sub-Order ID,Return Type\n" 
+            + smartDB.map(e => `"${e.date}","${e.awb}","${e.subid}","${e.type}"`).join("\n");
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `Claim_Report_v2_${new Date().toLocaleDateString().replace(/\//g,'-')}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function clearDatabase() {
+        if(confirm("⚠️ WARNING: Permanently delete all logged claims from your device?")) {
+            smartDB = [];
+            localStorage.setItem('meeshoSmartDB', JSON.stringify(smartDB));
+            updateDashboard();
+            document.getElementById('duplicateWarning').style.display = 'none';
+            document.getElementById('awb').style.borderColor = "var(--border-color)";
+            document.getElementById('awb').style.backgroundColor = "#fafafa";
+        }
+    }
+
     function clearForm() {
         document.getElementById('awb').value = '';
         document.getElementById('subid').value = '';
-        document.getElementById('subid').style.borderColor = "#e0e0e0";
-        document.getElementById('pid').value = '';
+        document.getElementById('subid').style.borderColor = "var(--border-color)";
+        document.getElementById('subid').style.backgroundColor = "#fafafa";
+        document.getElementById('awb').style.borderColor = "var(--border-color)";
+        document.getElementById('awb').style.backgroundColor = "#fafafa";
+        
         document.getElementById('ticketMessage').value = '';
         document.getElementById('returnReason').selectedIndex = 0;
         document.getElementById('mediaStatus').innerText = "Ready to capture...";
         document.getElementById('mediaStatus').style.color = "#666";
+        document.getElementById('mediaStatus').style.background = "#eee";
         document.getElementById('duplicateWarning').style.display = 'none';
         closeLiveCamera(); 
         
@@ -616,8 +692,11 @@
         if(rtoRadio) rtoRadio.checked = false;
         if(crRadio) crRadio.checked = false;
         document.getElementById('reasonContainer').style.display = 'none';
+        
+        document.getElementById('awb').focus(); // Ready for next scan
     }
 
+    // --- TICKET GENERATOR LOGIC ---
     function toggleReason() {
         const rtoRadio = document.querySelector('input[name="returnType"][value="RTO"]');
         const reasonContainer = document.getElementById('reasonContainer');
@@ -672,8 +751,6 @@
         const template = `Dear Meesho Support,\n\nAWB Number: ${awb}\nSub-Order ID: ${subId}\n\n${detailedIssue}`;
         document.getElementById('ticketMessage').value = template;
     }
-    
-    document.getElementById('pid').addEventListener('input', generateTicket);
 </script>
 </body>
 </html>
