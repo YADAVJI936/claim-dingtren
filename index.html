@@ -194,8 +194,19 @@
             <button class="btn-copy-sub" onclick="copy('subid')">✅ COPY ID</button>
         </div>
 
+        <div class="field-group">
+            <label>3. Packet ID</label>
+            <div class="input-row">
+                <input type="text" id="pid" placeholder="Scan or Type..." oninput="generateTicket()">
+            </div>
+            <div class="btn-row">
+                <button class="btn-scan" onclick="startScanner('pid')" style="background: #444;">📷 SCAN PACKET</button>
+                <button class="btn-copy" onclick="copy('pid')">COPY</button>
+            </div>
+        </div>
+
         <div class="field-group" style="border-top: 1px dashed #ccc; padding-top: 15px;">
-            <label>3. Capture Proof (Saves to PC)</label>
+            <label>4. Capture Proof (Saves to PC)</label>
             <div class="btn-row" id="media-buttons">
                 <button class="btn-media" onclick="openLiveCamera('photo')">📸 Photo</button>
                 <button class="btn-media" onclick="openLiveCamera('video')">🎥 Video (23MB)</button>
@@ -215,7 +226,7 @@
         </div>
 
         <div class="field-group" style="border-top: 1px dashed #ccc; padding-top: 15px;">
-            <label>4. AI Ticket Generator</label>
+            <label>5. AI Ticket Generator</label>
             
             <div class="radio-group">
                 <label><input type="radio" name="returnType" value="RTO" onchange="toggleReason(); generateTicket()"> RTO (Courier)</label>
@@ -223,7 +234,7 @@
             </div>
 
             <div id="reasonContainer" style="display: none; margin-bottom: 10px;">
-                <select id="returnReason" onchange="generateTicket()" style="font-size:12px; padding:10px;">
+                <select id="returnReason" onchange="generateTicket()" style="font-size:12px; padding:10px; width:100%; border-radius:5px;">
                     <option value="" disabled selected>Select Customer Return Reason...</option>
                     <option value="I have received damaged return">Received damaged return</option>
                     <option value="I have received wrong return">Received wrong return</option>
@@ -239,7 +250,7 @@
         </div>
 
         <div class="field-group" style="border-top: 1px dashed #ccc; padding-top: 15px;">
-            <label>5. AI Daily Log</label>
+            <label>6. AI Daily Log</label>
             <button class="btn-log" onclick="logCurrentClaim()">💾 SAVE & CLEAR FOR NEXT</button>
             
             <div class="ai-dashboard">
@@ -276,10 +287,9 @@
 <script>
     window.onload = function() {
         updateDashboard(); 
-        document.getElementById('awb').focus(); // Auto-focus AWB on load
+        document.getElementById('awb').focus(); 
     };
 
-    // --- QR AND EXCEL LOGIC ---
     let html5QrCode = null;
     let currentTarget = '';
     let excelData = []; 
@@ -374,7 +384,6 @@
         setTimeout(() => { field.style.background = originalBg; }, 500);
     }
 
-    // --- IN-APP LIVE CAMERA ENGINE (V2.0 23MB Tracker) ---
     let liveMediaStream = null;
     let liveMediaRecorder = null;
     let recordedChunks = [];
@@ -473,9 +482,8 @@
             }
         };
 
-        liveMediaRecorder.start(250); // Get chunks every 250ms for accurate tracking
+        liveMediaRecorder.start(250);
 
-        // Limit Enforcer (Strictly 23MB)
         sizeCheckInterval = setInterval(() => {
             const tempBlob = new Blob(recordedChunks);
             const sizeMB = (tempBlob.size / (1024 * 1024)).toFixed(2);
@@ -483,7 +491,7 @@
             document.getElementById('mediaStatus').innerHTML = `🔴 REC: ${sizeMB} MB / 23.00 MB`;
 
             if (sizeMB >= 23.00) {
-                stopLiveRecording(true); // limit hit
+                stopLiveRecording(true); 
             }
         }, 250);
     }
@@ -523,18 +531,15 @@
         }, 500); 
     }
 
-    // --- AI DATA VALIDATION & PUSH ---
     async function pushToMeeshoTab() {
         const awbText = document.getElementById('awb').value.trim();
         const subIdText = document.getElementById('subid').value.trim();
         const ticketText = document.getElementById('ticketMessage').value.trim();
         const pushBtn = document.getElementById('btn-push-meesho');
         
-        // AI Validation
         if (!awbText || awbText.length < 5) return alert("⚠️ AI Validation: Please enter a valid AWB number first!");
         if (!ticketText) return alert("⚠️ AI Validation: Please generate a ticket message first!");
 
-        // Loading state
         const originalText = pushBtn.innerHTML;
         pushBtn.innerHTML = "⏳ Pushing Data...";
         pushBtn.style.background = "#555";
@@ -547,7 +552,6 @@
             return alert("❌ Open the Meesho Support 'Create Ticket' page in the main browser window first!");
         }
 
-        // Inject script
         chrome.scripting.executeScript({
             target: { tabId: tab.id },
             func: (awb, subId, desc) => {
@@ -590,7 +594,6 @@
         });
     }
 
-    // --- AI DATA MANAGEMENT ENGINE ---
     let smartDB = JSON.parse(localStorage.getItem('meeshoSmartDB')) || [];
 
     function checkDuplicate(awbCheck) {
@@ -674,6 +677,7 @@
     function clearForm() {
         document.getElementById('awb').value = '';
         document.getElementById('subid').value = '';
+        document.getElementById('pid').value = '';
         document.getElementById('subid').style.borderColor = "var(--border-color)";
         document.getElementById('subid').style.backgroundColor = "#fafafa";
         document.getElementById('awb').style.borderColor = "var(--border-color)";
@@ -693,10 +697,9 @@
         if(crRadio) crRadio.checked = false;
         document.getElementById('reasonContainer').style.display = 'none';
         
-        document.getElementById('awb').focus(); // Ready for next scan
+        document.getElementById('awb').focus(); 
     }
 
-    // --- TICKET GENERATOR LOGIC ---
     function toggleReason() {
         const rtoRadio = document.querySelector('input[name="returnType"][value="RTO"]');
         const reasonContainer = document.getElementById('reasonContainer');
@@ -710,6 +713,7 @@
     function generateTicket() {
         const awb = document.getElementById('awb').value || "[Scan AWB]";
         const subId = document.getElementById('subid').value || "[Scan to Auto-fill]";
+        const pid = document.getElementById('pid').value ? `\nPacket ID: ${document.getElementById('pid').value}` : "";
         
         const typeNode = document.querySelector('input[name="returnType"]:checked');
         const returnType = typeNode ? typeNode.value : null;
@@ -748,7 +752,7 @@
             }
         }
 
-        const template = `Dear Meesho Support,\n\nAWB Number: ${awb}\nSub-Order ID: ${subId}\n\n${detailedIssue}`;
+        const template = `Dear Meesho Support,\n\nAWB Number: ${awb}\nSub-Order ID: ${subId}${pid}\n\n${detailedIssue}`;
         document.getElementById('ticketMessage').value = template;
     }
 </script>
