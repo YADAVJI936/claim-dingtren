@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Meesho Offline Hub v2.5 (Always-On Camera)</title>
+    <title>Meesho Offline Hub v2.6</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
@@ -72,6 +72,8 @@
         .btn-scan:hover { background: var(--meesho-light); }
         .btn-copy { background: #fce4ec; color: var(--meesho-purple); border: 1px solid var(--meesho-purple); }
         .btn-copy-sub { background: #e8f5e9; color: var(--success-green); border: 1px solid var(--success-green); width: 100%; }
+        .btn-media { background: #fff; border: 2px solid var(--border-color); color: #555; }
+        .btn-media:hover { border-color: var(--meesho-purple); color: var(--meesho-purple); }
         
         .radio-group { display: flex; gap: 15px; margin-bottom: 10px; flex-wrap: wrap;}
         .radio-group label { display: flex; align-items: center; gap: 5px; font-size: 14px; color: #333; font-weight: bold; cursor: pointer; }
@@ -98,7 +100,7 @@
 
 <div class="app-card">
     <div class="header">
-        <h2>Claim Hub Pro <span class="v2-badge">v2.5 AI</span></h2>
+        <h2>Claim Hub Pro <span class="v2-badge">v2.6 AI</span></h2>
     </div>
 
     <div class="upload-section">
@@ -145,18 +147,24 @@
         </div>
 
         <div class="field-group" style="border-top: 1px dashed #ccc; padding-top: 20px;">
-            <label>4. Live Camera (Always On)</label>
+            <label>4. Capture Proof (Saves to PC)</label>
             
-            <div id="live-media-container" style="background: #000; border-radius: 10px; overflow: hidden; border: 2px solid #333;">
+            <div class="btn-row" id="camera-start-buttons">
+                <button type="button" class="btn-media" onclick="openLiveCamera('photo')">📸 Start Photo Camera</button>
+                <button type="button" class="btn-media" onclick="openLiveCamera('video')">🎥 Start Video Camera (23MB)</button>
+            </div>
+
+            <div id="live-media-container" style="display: none; background: #000; border-radius: 10px; overflow: hidden; border: 2px solid #333; margin-top: 10px;">
                 <video id="live-media-feed" autoplay playsinline style="width: 100%; display: block; object-fit: cover; max-height: 250px;"></video>
                 <div style="padding: 10px; display: flex; gap: 8px; background: #222;">
-                    <button type="button" id="btn-capture-photo" style="background: var(--meesho-purple); color: white;" onclick="captureLivePhoto()">📸 SNAP PHOTO</button>
-                    <button type="button" id="btn-start-record" style="background: #d32f2f; color: white;" onclick="startLiveRecording()">🔴 REC (23MB)</button>
+                    <button type="button" id="btn-capture-photo" style="display: none; background: var(--meesho-purple); color: white;" onclick="captureLivePhoto()">📸 SNAP PHOTO</button>
+                    <button type="button" id="btn-start-record" style="display: none; background: #d32f2f; color: white;" onclick="startLiveRecording()">🔴 REC (23MB)</button>
                     <button type="button" id="btn-stop-record" style="display: none; background: #4caf50; color: white;" onclick="stopLiveRecording(false)">⏹️ STOP & SAVE</button>
+                    <button type="button" style="background: #555; color: white;" onclick="closeLiveCamera()">❌ CANCEL</button>
                 </div>
             </div>
 
-            <div id="mediaStatus" style="font-size: 13px; font-weight: bold; color: #666; margin-top: 8px; text-align: center; background: #eee; padding: 10px; border-radius: 8px;">Warming up camera...</div>
+            <div id="mediaStatus" style="font-size: 13px; font-weight: bold; color: #666; margin-top: 8px; text-align: center; background: #eee; padding: 10px; border-radius: 8px;">Ready to capture...</div>
         </div>
 
         <div class="field-group" style="border-top: 1px dashed #ccc; padding-top: 20px;">
@@ -215,51 +223,10 @@
 </div>
 
 <script>
-    // --- ALWAYS-ON CAMERA STATE ---
-    let liveMediaStream = null;
-    let liveMediaRecorder = null;
-    let recordedChunks = [];
-    let sizeCheckInterval = null;
-
     window.onload = function() {
         updateDashboard(); 
         document.getElementById('awb').focus(); 
-        startAlwaysOnCamera(); 
     };
-
-    async function startAlwaysOnCamera() {
-        document.getElementById('mediaStatus').innerText = "Connecting to camera...";
-        try {
-            // First try with Audio (for unboxing videos)
-            liveMediaStream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: "environment" },
-                audio: true 
-            });
-            attachStream();
-        } catch (err) {
-            // Fallback to Video only if microphone fails or is missing
-            try {
-                liveMediaStream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: "environment" },
-                    audio: false 
-                });
-                attachStream();
-            } catch (err2) {
-                document.getElementById('mediaStatus').innerText = "Camera blocked. Please allow in browser.";
-                document.getElementById('mediaStatus').style.background = "#ffebee";
-                document.getElementById('mediaStatus').style.color = "#d32f2f";
-            }
-        }
-        
-        function attachStream() {
-            const videoElement = document.getElementById('live-media-feed');
-            videoElement.srcObject = liveMediaStream;
-            videoElement.muted = true; 
-            document.getElementById('mediaStatus').innerText = "Live camera active. Ready to capture.";
-            document.getElementById('mediaStatus').style.background = "#e8f5e9";
-            document.getElementById('mediaStatus').style.color = "#2e7d32";
-        }
-    }
 
     // --- QR AND EXCEL LOGIC ---
     let html5QrCode = null;
@@ -318,6 +285,7 @@
             liveMediaStream.getTracks().forEach(track => track.stop());
             liveMediaStream = null;
         }
+        closeLiveCamera(); 
 
         currentTarget = targetField;
         document.getElementById('reader-container').style.display = 'block';
@@ -346,11 +314,9 @@
         if (html5QrCode) {
             html5QrCode.stop().then(() => { 
                 document.getElementById('reader-container').style.display = 'none'; 
-                startAlwaysOnCamera();
             });
         } else {
             document.getElementById('reader-container').style.display = 'none'; 
-            startAlwaysOnCamera();
         }
     }
 
@@ -363,6 +329,77 @@
         const originalBg = field.style.background;
         field.style.background = "#fff9c4";
         setTimeout(() => { field.style.background = originalBg; }, 500);
+    }
+
+    // --- CAMERA ENGINE ---
+    let liveMediaStream = null;
+    let liveMediaRecorder = null;
+    let recordedChunks = [];
+    let sizeCheckInterval = null;
+
+    async function openLiveCamera(mode) {
+        document.getElementById('camera-start-buttons').style.display = 'none';
+        document.getElementById('live-media-container').style.display = 'block';
+        document.getElementById('mediaStatus').innerText = "Connecting to camera...";
+        document.getElementById('mediaStatus').style.background = "#e3f2fd";
+        document.getElementById('mediaStatus').style.color = "#1565c0";
+
+        document.getElementById('btn-capture-photo').style.display = mode === 'photo' ? 'block' : 'none';
+        document.getElementById('btn-start-record').style.display = mode === 'video' ? 'block' : 'none';
+        document.getElementById('btn-stop-record').style.display = 'none';
+
+        try {
+            liveMediaStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: "environment" },
+                audio: mode === 'video' 
+            });
+            attachStream();
+        } catch (err) {
+            if(mode === 'video') {
+                try {
+                    liveMediaStream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: "environment" },
+                        audio: false 
+                    });
+                    attachStream();
+                } catch (err2) {
+                    cameraError();
+                }
+            } else {
+                cameraError();
+            }
+        }
+        
+        function attachStream() {
+            const videoElement = document.getElementById('live-media-feed');
+            videoElement.srcObject = liveMediaStream;
+            videoElement.muted = true; 
+            document.getElementById('mediaStatus').innerText = "Live camera active. Ready to capture.";
+            document.getElementById('mediaStatus').style.background = "#e8f5e9";
+            document.getElementById('mediaStatus').style.color = "#2e7d32";
+        }
+        
+        function cameraError() {
+            alert("Camera access denied. Please check your browser permissions.");
+            closeLiveCamera();
+        }
+    }
+
+    function closeLiveCamera() {
+        if (liveMediaStream) {
+            liveMediaStream.getTracks().forEach(track => track.stop());
+            liveMediaStream = null;
+        }
+        if (sizeCheckInterval) clearInterval(sizeCheckInterval);
+        if (liveMediaRecorder && liveMediaRecorder.state !== "inactive") {
+            liveMediaRecorder.stop();
+        }
+        document.getElementById('live-media-feed').srcObject = null;
+        document.getElementById('live-media-container').style.display = 'none';
+        document.getElementById('camera-start-buttons').style.display = 'flex';
+        document.getElementById('mediaStatus').innerText = "Ready to capture...";
+        document.getElementById('mediaStatus').style.background = "#eee";
+        document.getElementById('mediaStatus').style.color = "#666";
     }
 
     function captureLivePhoto() {
@@ -401,7 +438,9 @@
             document.getElementById('mediaStatus').style.color = "#2e7d32";
             
             setTimeout(() => {
-                document.getElementById('mediaStatus').innerText = "Live camera active. Ready to capture.";
+                if(liveMediaStream) {
+                    document.getElementById('mediaStatus').innerText = "Live camera active. Ready to capture.";
+                }
             }, 3000);
         }, 'image/jpeg', 0.95);
     }
@@ -456,7 +495,7 @@
         }
         clearInterval(sizeCheckInterval);
         
-        document.getElementById('btn-capture-photo').style.display = 'block';
+        document.getElementById('btn-capture-photo').style.display = 'none';
         document.getElementById('btn-start-record').style.display = 'block';
         document.getElementById('btn-stop-record').style.display = 'none';
         
@@ -498,7 +537,9 @@
             document.getElementById('mediaStatus').style.color = "#2e7d32";
             
             setTimeout(() => {
-                document.getElementById('mediaStatus').innerText = "Live camera active. Ready to capture.";
+                if(liveMediaStream) {
+                    document.getElementById('mediaStatus').innerText = "Live camera active. Ready to capture.";
+                }
             }, 4000);
         }, 500); 
     }
@@ -568,7 +609,7 @@
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `Claim_Report_v2.5_${new Date().toLocaleDateString().replace(/\//g,'-')}.csv`);
+        link.setAttribute("download", `Claim_Report_v2.6_${new Date().toLocaleDateString().replace(/\//g,'-')}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -597,6 +638,8 @@
         document.getElementById('ticketMessage').value = '';
         document.getElementById('returnReason').selectedIndex = 0;
         document.getElementById('duplicateWarning').style.display = 'none';
+        
+        closeLiveCamera(); 
         
         const rtoRadio = document.querySelector('input[name="returnType"][value="RTO"]');
         const crRadio = document.querySelector('input[name="returnType"][value="Customer Return"]');
@@ -663,6 +706,8 @@
         const template = `Dear Meesho Support,\n\nAWB Number: ${awb}\nSub-Order ID: ${subId}${pidText}\n\n${detailedIssue}`;
         document.getElementById('ticketMessage').value = template;
     }
+    
+    document.getElementById('pid').addEventListener('input', generateTicket);
 </script>
 </body>
 </html>
