@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Meesho Offline Hub v2.0</title>
+    <title>Meesho Offline Hub v2.5 (Always-On Camera)</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
@@ -30,7 +30,7 @@
             border-radius: 16px; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.12); 
             overflow: hidden; 
-            margin-top: 10px;
+            margin-top: 5px;
             margin-bottom: 20px;
             border: 1px solid #eaeaea;
         }
@@ -44,99 +44,34 @@
         .header h2 { margin: 0; font-size: 20px; letter-spacing: 0.5px; display: flex; justify-content: center; align-items: center; gap: 10px;}
         .v2-badge { background: #ffc107; color: #000; font-size: 10px; font-weight: 900; padding: 3px 8px; border-radius: 12px; letter-spacing: 1px;}
 
-        .upload-section { 
-            background: #fff5fa; 
-            padding: 20px; 
-            text-align: center; 
-            border-bottom: 1px solid #ffdaed; 
-        }
-        .upload-section label { 
-            font-weight: bold; 
-            color: var(--meesho-purple); 
-            display: block; 
-            margin-bottom: 12px; 
-            font-size: 14px; 
-        }
+        .upload-section { background: #fff5fa; padding: 15px; text-align: center; border-bottom: 1px solid #ffdaed; }
+        .upload-section label { font-weight: bold; color: var(--meesho-purple); display: block; margin-bottom: 10px; font-size: 13px; }
         input[type="file"] { font-size: 12px; width: 100%; }
 
-        .status-badge { 
-            display: inline-block; 
-            margin-top: 12px; 
-            padding: 6px 16px; 
-            border-radius: 20px; 
-            font-size: 12px; 
-            font-weight: 700; 
-            background: #eee; 
-            color: #555; 
-        }
+        .status-badge { display: inline-block; margin-top: 10px; padding: 5px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; background: #eee; color: #555; }
         .status-success { background: #e8f5e9; color: var(--success-green); border: 1px solid #a5d6a7; }
-        .status-warning { background: #fff3e0; color: #e65100; border: 1px solid #ffb74d; }
 
         #reader-container { background: #000; display: none; position: relative; border-radius: 8px; margin: 10px; overflow: hidden;}
         #reader { width: 100%; }
-        .close-cam { 
-            width: 100%; 
-            background: #333; 
-            color: white; 
-            border: none; 
-            padding: 15px; 
-            cursor: pointer; 
-            font-weight: bold; 
-            font-size: 14px; 
-            text-transform: uppercase;
-        }
+        .close-cam { width: 100%; background: #333; color: white; border: none; padding: 12px; cursor: pointer; font-weight: bold; font-size: 12px; text-transform: uppercase; }
 
-        .content { padding: 20px; }
-        .field-group { margin-bottom: 24px; }
-        .field-group label { 
-            display: block; 
-            font-size: 11px; 
-            font-weight: 800; 
-            color: #777; 
-            margin-bottom: 8px; 
-            text-transform: uppercase; 
-            letter-spacing: 0.5px;
-        }
+        .content { padding: 15px; }
+        .field-group { margin-bottom: 20px; }
+        .field-group label { display: block; font-size: 11px; font-weight: 800; color: #777; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        .input-row { display: flex; gap: 8px; margin-bottom: 10px; }
-        input[type="text"], select, textarea { 
-            flex: 1; 
-            padding: 14px; 
-            border: 2px solid var(--border-color); 
-            border-radius: 10px; 
-            font-size: 16px; 
-            font-family: 'Courier New', monospace; 
-            background: #fafafa;
-            transition: all 0.3s ease;
-            width: 100%;
-            box-sizing: border-box;
-        }
+        .input-row { display: flex; gap: 8px; margin-bottom: 8px; }
+        input[type="text"], select, textarea { flex: 1; padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 14px; font-family: 'Courier New', monospace; background: #fafafa; transition: all 0.3s ease; width: 100%; box-sizing: border-box; }
         input[type="text"]:focus, select:focus, textarea:focus { border-color: var(--meesho-purple); outline: none; background: #fff; box-shadow: 0 0 0 3px rgba(130, 0, 79, 0.1);}
-        textarea { font-family: 'Segoe UI', sans-serif; font-size: 13px; resize: vertical; min-height: 180px; }
+        textarea { font-family: 'Segoe UI', sans-serif; font-size: 13px; resize: vertical; min-height: 120px; }
 
-        .btn-row { display: flex; gap: 10px; }
-        button { 
-            flex: 1; 
-            padding: 14px; 
-            border: none; 
-            border-radius: 10px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            font-size: 13px; 
-            transition: transform 0.1s, opacity 0.2s, background 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-        }
+        .btn-row { display: flex; gap: 8px; }
+        button { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; transition: transform 0.1s, opacity 0.2s, background 0.3s; display: flex; align-items: center; justify-content: center; gap: 5px; }
         button:active { transform: scale(0.96); opacity: 0.9; }
 
         .btn-scan { background: var(--meesho-purple); color: white; box-shadow: 0 4px 10px rgba(130, 0, 79, 0.2); }
         .btn-scan:hover { background: var(--meesho-light); }
         .btn-copy { background: #fce4ec; color: var(--meesho-purple); border: 1px solid var(--meesho-purple); }
         .btn-copy-sub { background: #e8f5e9; color: var(--success-green); border: 1px solid var(--success-green); width: 100%; }
-        .btn-media { background: #fff; border: 2px solid var(--border-color); color: #555; }
-        .btn-media:hover { border-color: var(--meesho-purple); color: var(--meesho-purple); }
         
         .radio-group { display: flex; gap: 15px; margin-bottom: 10px; flex-wrap: wrap;}
         .radio-group label { display: flex; align-items: center; gap: 5px; font-size: 14px; color: #333; font-weight: bold; cursor: pointer; }
@@ -155,17 +90,15 @@
         .btn-log { background: #2196F3; color: white; width: 100%; margin-bottom: 10px; }
         .btn-log:hover { background: #1976D2; }
 
-        @media (min-width: 600px) {
-            body { padding: 40px 20px; }
-            .app-card { border-radius: 20px; }
-        }
+        #btn-push-meesho { width: 100%; margin-top: 10px; padding: 16px; background: #2e7d32; color: white; border-radius: 10px; font-weight: 900; font-size: 14px; border: none; box-shadow: 0 4px 12px rgba(46,125,50,0.3); cursor: pointer; transition: background 0.3s; }
+        #btn-push-meesho:hover { background: #1b5e20; }
     </style>
 </head>
 <body>
 
 <div class="app-card">
     <div class="header">
-        <h2>Claim Hub Pro <span class="v2-badge">v2.0 AI</span></h2>
+        <h2>Claim Hub Pro <span class="v2-badge">v2.5 AI</span></h2>
     </div>
 
     <div class="upload-section">
@@ -176,7 +109,7 @@
 
     <div id="reader-container">
         <div id="reader"></div>
-        <button class="close-cam" onclick="stopScanner()">🛑 Close Scanner</button>
+        <button type="button" class="close-cam" onclick="stopScanner()">🛑 Close Scanner</button>
     </div>
 
     <div class="content">
@@ -186,8 +119,8 @@
                 <input type="text" id="awb" placeholder="Scan or Type..." oninput="manualAwbCheck()">
             </div>
             <div class="btn-row">
-                <button class="btn-scan" onclick="startScanner('awb')">📷 SCAN AWB</button>
-                <button class="btn-copy" onclick="copy('awb')">COPY</button>
+                <button type="button" class="btn-scan" onclick="startScanner('awb')">📷 SCAN AWB</button>
+                <button type="button" class="btn-copy" onclick="copy('awb')">COPY</button>
             </div>
             <div id="duplicateWarning" style="color: #d32f2f; font-size: 11px; font-weight: bold; display: none; margin-top: 8px; background: #ffebee; padding: 8px; border-radius: 6px;">⚠️ AI Alert: Duplicate AWB Logged Today!</div>
         </div>
@@ -197,7 +130,7 @@
             <div class="input-row">
                 <input type="text" id="subid" placeholder="Auto-fills from file..." readonly style="background: #f0fdf4;">
             </div>
-            <button class="btn-copy-sub" onclick="copy('subid')">✅ COPY SUB-ORDER ID</button>
+            <button type="button" class="btn-copy-sub" onclick="copy('subid')">✅ COPY SUB-ORDER ID</button>
         </div>
 
         <div class="field-group">
@@ -206,29 +139,24 @@
                 <input type="text" id="pid" placeholder="Scan or Type..." oninput="generateTicket()">
             </div>
             <div class="btn-row">
-                <button class="btn-scan" onclick="startScanner('pid')" style="background: #444;">📷 SCAN PACKET</button>
-                <button class="btn-copy" onclick="copy('pid')">COPY</button>
+                <button type="button" class="btn-scan" onclick="startScanner('pid')" style="background: #444;">📷 SCAN PACKET</button>
+                <button type="button" class="btn-copy" onclick="copy('pid')">COPY</button>
             </div>
         </div>
 
         <div class="field-group" style="border-top: 1px dashed #ccc; padding-top: 20px;">
-            <label>4. Capture Proof (Saves to PC)</label>
-            <div class="btn-row" id="media-buttons">
-                <button class="btn-media" onclick="openLiveCamera('photo')">📸 Start Camera (Photo)</button>
-                <button class="btn-media" onclick="openLiveCamera('video')">🎥 Start Camera (23MB Video)</button>
-            </div>
+            <label>4. Live Camera (Always On)</label>
             
-            <div id="live-media-container" style="display: none; background: #000; margin-top: 10px; border-radius: 10px; overflow: hidden;">
-                <video id="live-media-feed" autoplay playsinline style="width: 100%; display: block; object-fit: cover; max-height: 300px;"></video>
+            <div id="live-media-container" style="background: #000; border-radius: 10px; overflow: hidden; border: 2px solid #333;">
+                <video id="live-media-feed" autoplay playsinline style="width: 100%; display: block; object-fit: cover; max-height: 250px;"></video>
                 <div style="padding: 10px; display: flex; gap: 8px; background: #222;">
-                    <button id="btn-capture-photo" style="display: none; background: var(--meesho-purple); color: white;" onclick="captureLivePhoto()">📸 CLICK & SAVE</button>
-                    <button id="btn-start-record" style="display: none; background: #d32f2f; color: white;" onclick="startLiveRecording()">🔴 REC</button>
-                    <button id="btn-stop-record" style="display: none; background: #4caf50; color: white;" onclick="stopLiveRecording(false)">⏹️ STOP & SAVE</button>
-                    <button style="background: #555; color: white;" onclick="closeLiveCamera()">❌ CANCEL</button>
+                    <button type="button" id="btn-capture-photo" style="background: var(--meesho-purple); color: white;" onclick="captureLivePhoto()">📸 SNAP PHOTO</button>
+                    <button type="button" id="btn-start-record" style="background: #d32f2f; color: white;" onclick="startLiveRecording()">🔴 REC (23MB)</button>
+                    <button type="button" id="btn-stop-record" style="display: none; background: #4caf50; color: white;" onclick="stopLiveRecording(false)">⏹️ STOP & SAVE</button>
                 </div>
             </div>
 
-            <div id="mediaStatus" style="font-size: 13px; font-weight: bold; color: #666; margin-top: 8px; text-align: center; background: #eee; padding: 10px; border-radius: 8px;">Ready to capture...</div>
+            <div id="mediaStatus" style="font-size: 13px; font-weight: bold; color: #666; margin-top: 8px; text-align: center; background: #eee; padding: 10px; border-radius: 8px;">Warming up camera...</div>
         </div>
 
         <div class="field-group" style="border-top: 1px dashed #ccc; padding-top: 20px;">
@@ -257,27 +185,18 @@
 
             <textarea id="ticketMessage" placeholder="AI formatted ticket message will appear here..." readonly></textarea>
             
-            <button class="btn-copy" style="width: 100%; margin-top: 10px; padding: 16px; background: #000; color: white; border-radius: 10px;" onclick="copy('ticketMessage')">📝 COPY TICKET TO PASTE IN MEESHO</button>
+            <button type="button" class="btn-copy" style="width: 100%; margin-top: 10px; padding: 16px; background: #000; color: white; border-radius: 10px;" onclick="copy('ticketMessage')">📝 COPY TICKET TO PASTE IN MEESHO</button>
         </div>
 
         <div class="field-group" style="border-top: 1px dashed #ccc; padding-top: 20px;">
             <label>6. AI Data Management Hub</label>
-            <button class="btn-log" onclick="logCurrentClaim()">💾 SAVE & CLEAR FOR NEXT</button>
+            <button type="button" class="btn-log" onclick="logCurrentClaim()">💾 SAVE & CLEAR FOR NEXT</button>
             
             <div class="ai-dashboard">
                 <div class="ai-stats">
-                    <div class="stat-box">
-                        <h3 id="stat-total">0</h3>
-                        <p>Total Saved</p>
-                    </div>
-                    <div class="stat-box">
-                        <h3 id="stat-rto">0</h3>
-                        <p>Total RTO</p>
-                    </div>
-                    <div class="stat-box">
-                        <h3 id="stat-cr">0</h3>
-                        <p>Total CR</p>
-                    </div>
+                    <div class="stat-box"><h3 id="stat-total">0</h3><p>Total Saved</p></div>
+                    <div class="stat-box"><h3 id="stat-rto">0</h3><p>Total RTO</p></div>
+                    <div class="stat-box"><h3 id="stat-cr">0</h3><p>Total CR</p></div>
                 </div>
                 <div style="font-size: 11px; font-weight: bold; color: #555; margin-bottom: 5px;">Recent Local History:</div>
                 <div class="history-list" id="history-container">
@@ -285,21 +204,62 @@
                 </div>
                 
                 <div class="btn-row" style="margin-top: 10px;">
-                    <button style="background: var(--success-green); color: white;" onclick="exportToCSV()">📊 Export CSV</button>
-                    <button style="background: #ffebee; color: #d32f2f; border: 1px solid #ffcdd2;" onclick="clearDatabase()">🗑️ Clear DB</button>
+                    <button type="button" style="background: var(--success-green); color: white;" onclick="exportToCSV()">📊 Export CSV</button>
+                    <button type="button" style="background: #ffebee; color: #d32f2f; border: 1px solid #ffcdd2;" onclick="clearDatabase()">🗑️ Clear DB</button>
                 </div>
             </div>
         </div>
 
-        <button class="clear-btn" onclick="clearForm()">🗑️ CLEAR FIELDS MANUALLY</button>
+        <button type="button" class="clear-btn" onclick="clearForm()">🗑️ CLEAR FIELDS MANUALLY</button>
     </div>
 </div>
 
 <script>
+    // --- ALWAYS-ON CAMERA STATE ---
+    let liveMediaStream = null;
+    let liveMediaRecorder = null;
+    let recordedChunks = [];
+    let sizeCheckInterval = null;
+
     window.onload = function() {
         updateDashboard(); 
         document.getElementById('awb').focus(); 
+        startAlwaysOnCamera(); 
     };
+
+    async function startAlwaysOnCamera() {
+        document.getElementById('mediaStatus').innerText = "Connecting to camera...";
+        try {
+            // First try with Audio (for unboxing videos)
+            liveMediaStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: "environment" },
+                audio: true 
+            });
+            attachStream();
+        } catch (err) {
+            // Fallback to Video only if microphone fails or is missing
+            try {
+                liveMediaStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: "environment" },
+                    audio: false 
+                });
+                attachStream();
+            } catch (err2) {
+                document.getElementById('mediaStatus').innerText = "Camera blocked. Please allow in browser.";
+                document.getElementById('mediaStatus').style.background = "#ffebee";
+                document.getElementById('mediaStatus').style.color = "#d32f2f";
+            }
+        }
+        
+        function attachStream() {
+            const videoElement = document.getElementById('live-media-feed');
+            videoElement.srcObject = liveMediaStream;
+            videoElement.muted = true; 
+            document.getElementById('mediaStatus').innerText = "Live camera active. Ready to capture.";
+            document.getElementById('mediaStatus').style.background = "#e8f5e9";
+            document.getElementById('mediaStatus').style.color = "#2e7d32";
+        }
+    }
 
     // --- QR AND EXCEL LOGIC ---
     let html5QrCode = null;
@@ -354,6 +314,11 @@
     }
 
     async function startScanner(targetField) {
+        if (liveMediaStream) {
+            liveMediaStream.getTracks().forEach(track => track.stop());
+            liveMediaStream = null;
+        }
+
         currentTarget = targetField;
         document.getElementById('reader-container').style.display = 'block';
         if (html5QrCode && html5QrCode.isScanning) await html5QrCode.stop();
@@ -365,7 +330,7 @@
             (decodedText) => {
                 const text = String(decodedText).trim();
                 if (currentTarget === 'awb' && (text.includes('http') || text.includes('{'))) return;
-                new Audio('https://www.soundjay.com/buttons/beep-07.mp3').play();
+                try { let snd = new Audio('https://www.soundjay.com/buttons/beep-07.mp3'); snd.play().catch(e=>{}); } catch(e){}
                 document.getElementById(currentTarget).value = text;
                 if (currentTarget === 'awb') {
                     findSubOrderId(text);
@@ -374,14 +339,18 @@
                 generateTicket();
                 stopScanner();
             }
-        ).catch(err => alert("Camera Permission Required! Make sure your browser allows camera access."));
+        ).catch(err => alert("Camera Permission Required for Scanner."));
     }
 
     function stopScanner() {
         if (html5QrCode) {
             html5QrCode.stop().then(() => { 
                 document.getElementById('reader-container').style.display = 'none'; 
+                startAlwaysOnCamera();
             });
+        } else {
+            document.getElementById('reader-container').style.display = 'none'; 
+            startAlwaysOnCamera();
         }
     }
 
@@ -396,95 +365,67 @@
         setTimeout(() => { field.style.background = originalBg; }, 500);
     }
 
-    // --- V2.0 LIVE CAMERA ENGINE WITH 23MB TRACKER ---
-    let liveMediaStream = null;
-    let liveMediaRecorder = null;
-    let recordedChunks = [];
-    let sizeCheckInterval = null;
-
-    async function openLiveCamera(mode) {
-        document.getElementById('media-buttons').style.display = 'none';
-        document.getElementById('live-media-container').style.display = 'block';
-        document.getElementById('mediaStatus').innerText = "Starting live camera...";
-        document.getElementById('mediaStatus').style.background = "#e3f2fd";
-        document.getElementById('mediaStatus').style.color = "#1565c0";
-        
-        document.getElementById('btn-capture-photo').style.display = mode === 'photo' ? 'block' : 'none';
-        document.getElementById('btn-start-record').style.display = mode === 'video' ? 'block' : 'none';
-        document.getElementById('btn-stop-record').style.display = 'none';
-
-        try {
-            liveMediaStream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: "environment" },
-                audio: mode === 'video' 
-            });
-            const videoElement = document.getElementById('live-media-feed');
-            videoElement.srcObject = liveMediaStream;
-            videoElement.muted = true; 
-            document.getElementById('mediaStatus').innerText = "Live camera active. Ready.";
-        } catch (err) {
-            alert("Camera access denied. Please check your browser permissions.");
-            closeLiveCamera();
-        }
-    }
-
-    function closeLiveCamera() {
-        if (liveMediaStream) {
-            liveMediaStream.getTracks().forEach(track => track.stop());
-            liveMediaStream = null;
-        }
-        if (sizeCheckInterval) clearInterval(sizeCheckInterval);
-        if (liveMediaRecorder && liveMediaRecorder.state !== "inactive") {
-            liveMediaRecorder.stop();
-        }
-        document.getElementById('live-media-feed').srcObject = null;
-        document.getElementById('live-media-container').style.display = 'none';
-        document.getElementById('media-buttons').style.display = 'flex';
-        document.getElementById('mediaStatus').innerText = "Ready to capture...";
-        document.getElementById('mediaStatus').style.background = "#eee";
-        document.getElementById('mediaStatus').style.color = "#666";
-    }
-
     function captureLivePhoto() {
+        if (!liveMediaStream) return alert("Camera is not active!");
+        
+        try {
+            let snd = new Audio('https://www.soundjay.com/buttons/beep-07.mp3');
+            snd.play().catch(e => {});
+        } catch(e) {}
+
         const video = document.getElementById('live-media-feed');
         const canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+        canvas.width = video.videoWidth || 640;
+        canvas.height = video.videoHeight || 480;
         
         canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
         
         canvas.toBlob((blob) => {
+            if(!blob) return alert("Failed to capture photo.");
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             const awbVal = document.getElementById('awb').value || "Claim";
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
             a.download = `Photo_${awbVal}_${timestamp}.jpg`;
             a.href = url;
+            a.target = "_blank";
             a.style.display = 'none';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-            URL.revokeObjectURL(url);
             
-            new Audio('https://www.soundjay.com/buttons/beep-07.mp3').play();
+            setTimeout(() => { URL.revokeObjectURL(url); }, 2000);
+            
             document.getElementById('mediaStatus').innerHTML = `✅ Photo saved to PC!`;
             document.getElementById('mediaStatus').style.background = "#e8f5e9";
             document.getElementById('mediaStatus').style.color = "#2e7d32";
-            closeLiveCamera();
+            
+            setTimeout(() => {
+                document.getElementById('mediaStatus').innerText = "Live camera active. Ready to capture.";
+            }, 3000);
         }, 'image/jpeg', 0.95);
     }
 
     function startLiveRecording() {
+        if (!liveMediaStream) return alert("Camera is not active!");
         recordedChunks = [];
+        
+        let options = { mimeType: 'video/mp4' };
+        if (!MediaRecorder.isTypeSupported('video/mp4')) {
+            options = { mimeType: 'video/webm' };
+        }
+        
         try {
-            liveMediaRecorder = new MediaRecorder(liveMediaStream);
+            liveMediaRecorder = new MediaRecorder(liveMediaStream, options);
         } catch (e) {
-            alert("Video recording is not supported on this browser.");
-            return;
+            try { liveMediaRecorder = new MediaRecorder(liveMediaStream); } 
+            catch (err) { return alert("Video recording not supported."); }
         }
 
+        document.getElementById('btn-capture-photo').style.display = 'none';
         document.getElementById('btn-start-record').style.display = 'none';
         document.getElementById('btn-stop-record').style.display = 'block';
+        
         document.getElementById('mediaStatus').innerHTML = `🔴 REC: 0.00 MB / 23.00 MB`;
         document.getElementById('mediaStatus').style.background = "#ffebee";
         document.getElementById('mediaStatus').style.color = "#d32f2f";
@@ -495,10 +436,8 @@
             }
         };
 
-        // Record chunks every 250ms for accurate size tracking
         liveMediaRecorder.start(250);
 
-        // Limit Enforcer (Strictly 23MB)
         sizeCheckInterval = setInterval(() => {
             const tempBlob = new Blob(recordedChunks);
             const sizeMB = (tempBlob.size / (1024 * 1024)).toFixed(2);
@@ -517,23 +456,38 @@
         }
         clearInterval(sizeCheckInterval);
         
+        document.getElementById('btn-capture-photo').style.display = 'block';
+        document.getElementById('btn-start-record').style.display = 'block';
+        document.getElementById('btn-stop-record').style.display = 'none';
+        
+        document.getElementById('mediaStatus').innerText = "Processing video...";
+        
         setTimeout(() => {
-            const finalBlob = new Blob(recordedChunks, { type: 'video/mp4' });
+            try {
+                let snd = new Audio('https://www.soundjay.com/buttons/beep-07.mp3');
+                snd.play().catch(e=>{});
+            } catch(e) {}
+
+            const finalBlob = new Blob(recordedChunks, { type: liveMediaRecorder.mimeType || 'video/mp4' });
             const finalSizeMB = (finalBlob.size / (1024 * 1024)).toFixed(2);
             
             const url = URL.createObjectURL(finalBlob);
             const a = document.createElement('a');
             const awbVal = document.getElementById('awb').value || "Claim";
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-            a.download = `Video_${awbVal}_${timestamp}.mp4`;
+            
+            let ext = "mp4";
+            if (finalBlob.type.includes("webm")) ext = "webm";
+            
+            a.download = `Video_${awbVal}_${timestamp}.${ext}`;
             a.href = url;
+            a.target = "_blank";
             a.style.display = 'none';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-            URL.revokeObjectURL(url);
             
-            new Audio('https://www.soundjay.com/buttons/beep-07.mp3').play();
+            setTimeout(() => { URL.revokeObjectURL(url); }, 3000);
             
             if (limitHit) {
                 document.getElementById('mediaStatus').innerHTML = `✅ Saved strictly at 23MB limit. (${finalSizeMB} MB).`;
@@ -542,7 +496,10 @@
             }
             document.getElementById('mediaStatus').style.background = "#e8f5e9";
             document.getElementById('mediaStatus').style.color = "#2e7d32";
-            closeLiveCamera();
+            
+            setTimeout(() => {
+                document.getElementById('mediaStatus').innerText = "Live camera active. Ready to capture.";
+            }, 4000);
         }, 500); 
     }
 
@@ -553,7 +510,6 @@
         const isDupe = smartDB.some(item => item.awb === awbCheck && item.awb !== "");
         document.getElementById('duplicateWarning').style.display = isDupe ? 'block' : 'none';
         
-        // AI Visual Feedback
         if (isDupe) {
             document.getElementById('awb').style.borderColor = "#d32f2f";
             document.getElementById('awb').style.backgroundColor = "#ffebee";
@@ -581,7 +537,7 @@
         smartDB.push(claimRecord);
         localStorage.setItem('meeshoSmartDB', JSON.stringify(smartDB));
         
-        new Audio('https://www.soundjay.com/buttons/button-09.mp3').play();
+        try { let snd = new Audio('https://www.soundjay.com/buttons/button-09.mp3'); snd.play().catch(e=>{}); } catch(e){}
         updateDashboard();
         clearForm(); 
     }
@@ -612,7 +568,7 @@
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `Claim_Report_v2_${new Date().toLocaleDateString().replace(/\//g,'-')}.csv`);
+        link.setAttribute("download", `Claim_Report_v2.5_${new Date().toLocaleDateString().replace(/\//g,'-')}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -640,11 +596,7 @@
         
         document.getElementById('ticketMessage').value = '';
         document.getElementById('returnReason').selectedIndex = 0;
-        document.getElementById('mediaStatus').innerText = "Ready to capture...";
-        document.getElementById('mediaStatus').style.color = "#666";
-        document.getElementById('mediaStatus').style.background = "#eee";
         document.getElementById('duplicateWarning').style.display = 'none';
-        closeLiveCamera(); 
         
         const rtoRadio = document.querySelector('input[name="returnType"][value="RTO"]');
         const crRadio = document.querySelector('input[name="returnType"][value="Customer Return"]');
@@ -652,10 +604,9 @@
         if(crRadio) crRadio.checked = false;
         document.getElementById('reasonContainer').style.display = 'none';
         
-        document.getElementById('awb').focus(); // Ready for next scan
+        document.getElementById('awb').focus(); 
     }
 
-    // --- TICKET GENERATOR LOGIC ---
     function toggleReason() {
         const rtoRadio = document.querySelector('input[name="returnType"][value="RTO"]');
         const reasonContainer = document.getElementById('reasonContainer');
@@ -712,8 +663,6 @@
         const template = `Dear Meesho Support,\n\nAWB Number: ${awb}\nSub-Order ID: ${subId}${pidText}\n\n${detailedIssue}`;
         document.getElementById('ticketMessage').value = template;
     }
-    
-    document.getElementById('pid').addEventListener('input', generateTicket);
 </script>
 </body>
 </html>
