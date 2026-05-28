@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Meesho Offline Hub v2.6</title>
+    <title>Meesho Offline Hub v2.8</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
@@ -35,12 +35,7 @@
             border: 1px solid #eaeaea;
         }
 
-        .header { 
-            background: linear-gradient(135deg, var(--meesho-purple), var(--meesho-light)); 
-            color: white; 
-            padding: 18px; 
-            text-align: center; 
-        }
+        .header { background: linear-gradient(135deg, var(--meesho-purple), var(--meesho-light)); color: white; padding: 18px; text-align: center; }
         .header h2 { margin: 0; font-size: 20px; letter-spacing: 0.5px; display: flex; justify-content: center; align-items: center; gap: 10px;}
         .v2-badge { background: #ffc107; color: #000; font-size: 10px; font-weight: 900; padding: 3px 8px; border-radius: 12px; letter-spacing: 1px;}
 
@@ -63,6 +58,9 @@
         input[type="text"], select, textarea { flex: 1; padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 14px; font-family: 'Courier New', monospace; background: #fafafa; transition: all 0.3s ease; width: 100%; box-sizing: border-box; }
         input[type="text"]:focus, select:focus, textarea:focus { border-color: var(--meesho-purple); outline: none; background: #fff; box-shadow: 0 0 0 3px rgba(130, 0, 79, 0.1);}
         textarea { font-family: 'Segoe UI', sans-serif; font-size: 13px; resize: vertical; min-height: 120px; }
+
+        .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+        .data-grid input { font-size: 12px; padding: 10px; }
 
         .btn-row { display: flex; gap: 8px; }
         button { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; transition: transform 0.1s, opacity 0.2s, background 0.3s; display: flex; align-items: center; justify-content: center; gap: 5px; }
@@ -88,7 +86,6 @@
         .stat-box p { margin: 4px 0 0; font-size: 10px; color: #777; font-weight: bold; text-transform: uppercase; }
         .history-list { max-height: 150px; overflow-y: auto; font-size: 11px; background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 5px; }
         .history-item { padding: 8px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;}
-        .history-item:last-child { border-bottom: none; }
         .btn-log { background: #2196F3; color: white; width: 100%; margin-bottom: 10px; }
         .btn-log:hover { background: #1976D2; }
 
@@ -100,7 +97,7 @@
 
 <div class="app-card">
     <div class="header">
-        <h2>Claim Hub Pro <span class="v2-badge">v2.6 AI</span></h2>
+        <h2>Claim Hub Pro <span class="v2-badge">v2.8 AI</span></h2>
     </div>
 
     <div class="upload-section">
@@ -128,11 +125,17 @@
         </div>
 
         <div class="field-group">
-            <label>2. Sub-Order ID</label>
+            <label>2. Order Details (Auto-filled from File)</label>
             <div class="input-row">
-                <input type="text" id="subid" placeholder="Auto-fills from file..." readonly style="background: #f0fdf4;">
+                <input type="text" id="subid" placeholder="Sub-Order ID" readonly style="background: #f0fdf4;">
             </div>
-            <button type="button" class="btn-copy-sub" onclick="copy('subid')">✅ COPY SUB-ORDER ID</button>
+            <div class="data-grid">
+                <input type="text" id="sku" placeholder="SKU ID (Col C)" title="SKU ID" readonly style="background: #f0fdf4;">
+                <input type="text" id="qty" placeholder="Quantity (Col G)" title="Quantity" readonly style="background: #f0fdf4;">
+            </div>
+            <div class="input-row">
+                <input type="text" id="fileReason" placeholder="Meesho Reason (Col T)" title="Return Reason from File" readonly style="background: #f0fdf4;">
+            </div>
         </div>
 
         <div class="field-group">
@@ -177,17 +180,17 @@
 
             <div id="reasonContainer" style="display: none; margin-bottom: 10px;">
                 <select id="returnReason" onchange="generateTicket()" style="width: 100%; padding: 12px; border-radius: 8px; font-size: 14px; border: 2px solid var(--border-color);">
-                    <option value="" disabled selected>Select Customer Return Reason...</option>
+                    <option value="" disabled selected>Select Your Claim Reason...</option>
                     <option value="I have received wrong return">I have received wrong return</option>
                     <option value="I have received damaged return">I have received damaged return</option>
                     <option value="I have not received my Return/RTO shipment">I have not received my Return/RTO shipment</option>
                     <option value="Item/s are missing in my return">Item/s are missing in my return</option>
                     <option value="I have received a wrong barcoded package in RTO">I have received a wrong barcoded package in RTO</option>
                     <option value="I have received used product as return">I have received used product as return</option>
-                    <option value="Return/RTO product not received but marked delivered">Return/RTO product not received but marked delivered - Need Proof of Delivery</option>
-                    <option value="Return/RTO Delivery Issue - False Attempt by Logistic Partner">Return/RTO Delivery Issue - False Attempt by Logistic Partner</option>
-                    <option value="I have received an RTO in a non-barcoded package">I have received an RTO in a non-barcoded package</option>
-                    <option value="Other Returns/RTO and Exchange related issue">Other Returns/RTO and Exchange related issue</option>
+                    <option value="Return/RTO product not received but marked delivered">Return/RTO product not received but marked delivered</option>
+                    <option value="Return/RTO Delivery Issue - False Attempt by Logistic Partner">Return/RTO Delivery Issue - False Attempt</option>
+                    <option value="Size related issue">Size related issue</option>
+                    <option value="Other Returns/RTO and Exchange related issue">Other Issue</option>
                 </select>
             </div>
 
@@ -251,24 +254,56 @@
     function findSubOrderId(awbScanned) {
         if (excelData.length === 0) return; 
         const cleanAwb = String(awbScanned).trim().toUpperCase();
+        
         let foundSubId = null;
+        let foundSku = null;
+        let foundQty = null;
+        let foundReason = null;
+
         for (let r = 0; r < excelData.length; r++) {
             if (excelData[r].join("|||").toUpperCase().includes(cleanAwb)) {
-                if (excelData[r].length > 8) {
-                    foundSubId = String(excelData[r][8]).trim();
-                }
+                
+                // MAPPED TO YOUR EXACT COLUMNS:
+                // Column I (Index 8) = Sub-Order ID
+                // Column C (Index 2) = SKU ID
+                // Column G (Index 6) = Quantity
+                // Column T (Index 19) = Return Reason
+                
+                if (excelData[r].length > 8) foundSubId = String(excelData[r][8]).trim();  
+                if (excelData[r].length > 2) foundSku = String(excelData[r][2]).trim();    
+                if (excelData[r].length > 6) foundQty = String(excelData[r][6]).trim();  
+                if (excelData[r].length > 19) foundReason = String(excelData[r][19]).trim(); 
                 break; 
             }
         }
+
         const subIdBox = document.getElementById('subid');
+        const skuBox = document.getElementById('sku');
+        const qtyBox = document.getElementById('qty');
+        const reasonBox = document.getElementById('fileReason');
+
         if (foundSubId && foundSubId !== "undefined" && foundSubId !== "") {
             subIdBox.value = foundSubId;
-            subIdBox.style.borderColor = "#4caf50"; 
-            subIdBox.style.backgroundColor = "#e8f5e9";
+            skuBox.value = foundSku && foundSku !== "undefined" ? foundSku : "N/A";
+            qtyBox.value = foundQty && foundQty !== "undefined" ? foundQty : "1";
+            reasonBox.value = foundReason && foundReason !== "undefined" ? foundReason : "N/A";
+            
+            // Visual Green Success
+            subIdBox.style.borderColor = "#4caf50"; subIdBox.style.backgroundColor = "#e8f5e9";
+            skuBox.style.borderColor = "#4caf50"; skuBox.style.backgroundColor = "#e8f5e9";
+            qtyBox.style.borderColor = "#4caf50"; qtyBox.style.backgroundColor = "#e8f5e9";
+            reasonBox.style.borderColor = "#4caf50"; reasonBox.style.backgroundColor = "#e8f5e9";
         } else {
             subIdBox.value = "NOT FOUND";
-            subIdBox.style.borderColor = "#f44336"; 
-            subIdBox.style.backgroundColor = "#ffebee";
+            skuBox.value = "";
+            qtyBox.value = "";
+            reasonBox.value = "";
+            
+            // Visual Red Error
+            subIdBox.style.borderColor = "#f44336"; subIdBox.style.backgroundColor = "#ffebee";
+            skuBox.style.borderColor = "var(--border-color)"; skuBox.style.backgroundColor = "#fafafa";
+            qtyBox.style.borderColor = "var(--border-color)"; qtyBox.style.backgroundColor = "#fafafa";
+            reasonBox.style.borderColor = "var(--border-color)"; reasonBox.style.backgroundColor = "#fafafa";
         }
         generateTicket(); 
     }
@@ -609,7 +644,7 @@
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `Claim_Report_v2.6_${new Date().toLocaleDateString().replace(/\//g,'-')}.csv`);
+        link.setAttribute("download", `Claim_Report_v2.8_${new Date().toLocaleDateString().replace(/\//g,'-')}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -627,13 +662,25 @@
     }
 
     function clearForm() {
+        // Clear inputs
         document.getElementById('awb').value = '';
         document.getElementById('subid').value = '';
         document.getElementById('pid').value = '';
-        document.getElementById('subid').style.borderColor = "var(--border-color)";
-        document.getElementById('subid').style.backgroundColor = "#fafafa";
-        document.getElementById('awb').style.borderColor = "var(--border-color)";
-        document.getElementById('awb').style.backgroundColor = "#fafafa";
+        document.getElementById('sku').value = '';
+        document.getElementById('qty').value = '';
+        document.getElementById('fileReason').value = '';
+        
+        // Reset colors
+        const defaultBg = "#fafafa";
+        const defaultBorder = "var(--border-color)";
+        
+        ['subid', 'awb', 'sku', 'qty', 'fileReason'].forEach(id => {
+            const el = document.getElementById(id);
+            if(el) {
+                el.style.borderColor = defaultBorder;
+                el.style.backgroundColor = defaultBg;
+            }
+        });
         
         document.getElementById('ticketMessage').value = '';
         document.getElementById('returnReason').selectedIndex = 0;
@@ -663,6 +710,11 @@
     function generateTicket() {
         const awb = document.getElementById('awb').value || "[Scan AWB]";
         const subId = document.getElementById('subid').value || "[Scan to Auto-fill]";
+        
+        const sku = document.getElementById('sku').value && document.getElementById('sku').value !== "N/A" ? document.getElementById('sku').value : "";
+        const qty = document.getElementById('qty').value && document.getElementById('qty').value !== "N/A" ? document.getElementById('qty').value : "";
+        const fileReason = document.getElementById('fileReason').value && document.getElementById('fileReason').value !== "N/A" ? document.getElementById('fileReason').value : "";
+        
         const pid = document.getElementById('pid').value;
         const pidText = pid ? `\nPacket ID: ${pid}` : "";
         
@@ -703,7 +755,13 @@
             }
         }
 
-        const template = `Dear Meesho Support,\n\nAWB Number: ${awb}\nSub-Order ID: ${subId}${pidText}\n\n${detailedIssue}`;
+        let template = `Dear Meesho Support,\n\nAWB Number: ${awb}\nSub-Order ID: ${subId}`;
+        if(sku) template += `\nSKU: ${sku}`;
+        if(qty) template += `\nQuantity: ${qty}`;
+        if(fileReason) template += `\nMeesho Listed Reason: ${fileReason}`;
+        
+        template += `${pidText}\n\n${detailedIssue}`;
+        
         document.getElementById('ticketMessage').value = template;
     }
     
