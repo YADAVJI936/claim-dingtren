@@ -3,23 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DINGTREN Claim Hub v4.0</title>
+    <title>DINGTREN Claim Hub v4.1</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Professional SaaS Palette */
-            --primary: #4f46e5;         /* Deep Indigo */
+            --primary: #4f46e5;
             --primary-hover: #4338ca;
-            --secondary: #0f172a;       /* Dark Slate */
-            --success: #10b981;         /* Emerald Green */
-            --danger: #ef4444;          /* Crimson Red */
-            --background: #f1f5f9;      /* Light Gray-Blue */
-            --surface: #ffffff;         /* Pure White */
-            --border: #e2e8f0;          /* Soft Gray Border */
-            --text-main: #1e293b;       /* Dark Text */
-            --text-muted: #64748b;      /* Muted Text */
+            --secondary: #0f172a;
+            --success: #10b981;
+            --danger: #ef4444;
+            --background: #f1f5f9;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
             
             --radius-sm: 8px;
             --radius-md: 12px;
@@ -85,7 +84,6 @@
             text-transform: uppercase;
         }
 
-        /* Modern Upload Zone */
         .upload-section { 
             background: #f8fafc; 
             padding: 24px 20px; 
@@ -166,7 +164,6 @@
 
         .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
 
-        /* Data Pills (For Excel Data) */
         .data-pill {
             background: #f8fafc;
             border: 1px solid var(--border);
@@ -223,7 +220,6 @@
         .clear-btn { width: 100%; background: transparent; color: var(--text-muted); margin-top: 25px; border: 1px dashed #cbd5e1; font-size: 12px; padding: 16px; border-radius: var(--radius-md); cursor: pointer;}
         .clear-btn:hover { background: #f8fafc; color: var(--danger); border-color: var(--danger);}
 
-        /* Sleek Dashboard */
         .ai-dashboard { background: #f8fafc; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; margin-top: 15px; }
         .ai-stats { display: flex; gap: 12px; margin-bottom: 15px; }
         .stat-box { flex: 1; background: #fff; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 15px 10px; text-align: center; box-shadow: var(--shadow-sm);}
@@ -237,7 +233,6 @@
         .btn-log { background: var(--text-main); color: white; width: 100%; margin-bottom: 15px; box-shadow: var(--shadow-md);}
         .btn-log:hover { background: #0f172a; }
 
-        /* Glowing Primary CTA */
         #btn-push-meesho { 
             width: 100%; 
             margin-top: 12px; 
@@ -255,13 +250,10 @@
         }
         #btn-push-meesho:hover { background: var(--primary-hover); box-shadow: 0 6px 20px rgba(79, 70, 229, 0.6); transform: translateY(-1px);}
 
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         
-        /* Section Dividers */
         .divider { height: 1px; background: var(--border); margin: 25px 0; }
     </style>
 </head>
@@ -269,7 +261,7 @@
 
 <div class="app-card">
     <div class="header">
-        <h2>DINGTREN CLAIM HUB <span class="v4-badge">v4.0 Pro</span></h2>
+        <h2>DINGTREN CLAIM HUB <span class="v4-badge">v4.1 Mobile Fix</span></h2>
     </div>
 
     <div class="upload-section">
@@ -305,7 +297,6 @@
                 <button type="button" class="btn-copy-sub" onclick="copy('subid')">✅ Copy ID</button>
             </div>
             
-            <!-- Sleek Data Pills -->
             <div class="data-grid">
                 <div class="data-pill" id="pill-sku">
                     SKU ID
@@ -321,7 +312,6 @@
                 <span id="txt-reason">Waiting...</span>
             </div>
             
-            <!-- Hidden inputs to keep your JS logic intact -->
             <input type="hidden" id="sku">
             <input type="hidden" id="qty">
             <input type="hidden" id="fileReason">
@@ -343,7 +333,7 @@
 
         <div class="divider"></div>
 
-        <!-- 4. CAMERA -->
+        <!-- 4. CAMERA (FIXED FOR MOTOROLA/PHONES) -->
         <div class="field-group">
             <label>4. Evidence Capture</label>
             
@@ -472,13 +462,10 @@
         }
 
         const subIdBox = document.getElementById('subid');
-        
-        // Hidden inputs for logic
         const skuBox = document.getElementById('sku');
         const qtyBox = document.getElementById('qty');
         const reasonBox = document.getElementById('fileReason');
         
-        // Visual UI elements
         const pSku = document.getElementById('pill-sku');
         const pQty = document.getElementById('pill-qty');
         const pReason = document.getElementById('pill-reason');
@@ -492,7 +479,6 @@
             qtyBox.value = foundQty && foundQty !== "undefined" ? foundQty : "1";
             reasonBox.value = foundReason && foundReason !== "undefined" ? foundReason : "N/A";
             
-            // Update UI Text
             tSku.innerText = skuBox.value;
             tQty.innerText = qtyBox.value;
             tReason.innerText = reasonBox.value;
@@ -568,7 +554,6 @@
         field.setSelectionRange(0, 99999);
         navigator.clipboard.writeText(field.value);
         
-        // Button visual feedback
         if(id === 'ticketMessage') {
             const btn = document.getElementById('btn-push-meesho');
             const orig = btn.innerText;
@@ -582,7 +567,7 @@
         }
     }
 
-    // --- CAMERA ENGINE ---
+    // --- MOBILE FLASH-CLEAN CAMERA ENGINE ---
     let liveMediaStream = null;
     let liveMediaRecorder = null;
     let recordedChunks = [];
@@ -594,7 +579,6 @@
         document.getElementById('mediaStatus').innerText = "Connecting to camera hardware...";
         document.getElementById('mediaStatus').style.background = "#e0e7ff";
         document.getElementById('mediaStatus').style.color = "#4f46e5";
-        document.getElementById('mediaStatus').style.borderColor = "#c7d2fe";
 
         document.getElementById('btn-capture-photo').style.display = mode === 'photo' ? 'block' : 'none';
         document.getElementById('btn-start-record').style.display = mode === 'video' ? 'block' : 'none';
@@ -629,11 +613,10 @@
             document.getElementById('mediaStatus').innerText = "Camera active. Ready to capture.";
             document.getElementById('mediaStatus').style.background = "#ecfdf5";
             document.getElementById('mediaStatus').style.color = "#059669";
-            document.getElementById('mediaStatus').style.borderColor = "#a7f3d0";
         }
         
         function cameraError() {
-            alert("Camera access denied. Please check your browser permissions.");
+            alert("Camera access denied.");
             closeLiveCamera();
         }
     }
@@ -653,7 +636,6 @@
         document.getElementById('mediaStatus').innerText = "Ready to capture evidence.";
         document.getElementById('mediaStatus').style.background = "#f8fafc";
         document.getElementById('mediaStatus').style.color = "var(--text-muted)";
-        document.getElementById('mediaStatus').style.borderColor = "var(--border)";
     }
 
     function captureLivePhoto() {
@@ -663,10 +645,13 @@
 
         const video = document.getElementById('live-media-feed');
         const canvas = document.createElement('canvas');
+        
+        // Lower standard sizing slightly for mobile memory stability
         canvas.width = video.videoWidth || 640;
         canvas.height = video.videoHeight || 480;
         
-        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         
         canvas.toBlob((blob) => {
             if(!blob) return alert("Failed to capture photo.");
@@ -676,13 +661,17 @@
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
             a.download = `Photo_${awbVal}_${timestamp}.jpg`;
             a.href = url;
-            a.target = "_blank";
             a.style.display = 'none';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             
-            setTimeout(() => { URL.revokeObjectURL(url); }, 2000);
+            // CRITICAL MOBILE FIX: Force memory cleanup immediately after download triggers
+            setTimeout(() => { 
+                URL.revokeObjectURL(url); 
+                ctx.clearRect(0, 0, canvas.width, canvas.height); // Flush canvas rendering contexts
+                canvas.remove();
+            }, 1000);
             
             document.getElementById('mediaStatus').innerHTML = `✅ Photo saved to computer!`;
             
@@ -690,8 +679,8 @@
                 if(liveMediaStream) {
                     document.getElementById('mediaStatus').innerText = "Camera active. Ready to capture.";
                 }
-            }, 3000);
-        }, 'image/jpeg', 0.95);
+            }, 2500);
+        }, 'image/jpeg', 0.85); // 0.85 compression saves mobile RAM without dropping sharp visual text details
     }
 
     function startLiveRecording() {
@@ -717,7 +706,6 @@
         document.getElementById('mediaStatus').innerHTML = `🔴 RECORDING: 0.00 MB / 23.00 MB`;
         document.getElementById('mediaStatus').style.background = "#fef2f2";
         document.getElementById('mediaStatus').style.color = "#dc2626";
-        document.getElementById('mediaStatus').style.borderColor = "#fecaca";
 
         liveMediaRecorder.ondataavailable = function(event) {
             if (event.data.size > 0) {
@@ -748,11 +736,10 @@
         document.getElementById('btn-capture-photo').style.display = 'none';
         document.getElementById('btn-start-record').style.display = 'block';
         document.getElementById('btn-stop-record').style.display = 'none';
-        
         document.getElementById('mediaStatus').innerText = "Processing video file...";
         
         setTimeout(() => {
-            try { let snd = new Audio('https://www.soundjay.com/buttons/beep-07.mp3'); snd.play().catch(e=>{}); } catch(e) {}
+            try { let snd = new Audio('https://www.soundjay.com/buttons/beep-07.mp3'); snd.play().catch(e=>{}); } catch(e){}
 
             const finalBlob = new Blob(recordedChunks, { type: liveMediaRecorder.mimeType || 'video/mp4' });
             const finalSizeMB = (finalBlob.size / (1024 * 1024)).toFixed(2);
@@ -767,13 +754,13 @@
             
             a.download = `Video_${awbVal}_${timestamp}.${ext}`;
             a.href = url;
-            a.target = "_blank";
             a.style.display = 'none';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             
-            setTimeout(() => { URL.revokeObjectURL(url); }, 3000);
+            // Force memory revocation for mobile video blob cycles
+            setTimeout(() => { URL.revokeObjectURL(url); recordedChunks = []; }, 2000);
             
             if (limitHit) {
                 document.getElementById('mediaStatus').innerHTML = `✅ Saved strictly at 23MB limit. (${finalSizeMB} MB).`;
@@ -782,13 +769,6 @@
             }
             document.getElementById('mediaStatus').style.background = "#ecfdf5";
             document.getElementById('mediaStatus').style.color = "#059669";
-            document.getElementById('mediaStatus').style.borderColor = "#a7f3d0";
-            
-            setTimeout(() => {
-                if(liveMediaStream) {
-                    document.getElementById('mediaStatus').innerText = "Camera active. Ready to capture.";
-                }
-            }, 4000);
         }, 500); 
     }
 
