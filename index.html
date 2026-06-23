@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DINGTREN Claim Hub v6.1</title>
+    <title>DINGTREN Claim Hub v6.2</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -198,7 +198,7 @@
 
 <div class="app-card">
     <div class="header">
-        <h2>DINGTREN CLAIM HUB <span class="v6-badge">v6.1 Fixed</span></h2>
+        <h2>DINGTREN CLAIM HUB <span class="v4-badge">v6.2 Flex</span></h2>
         <button id="soundToggle" class="sound-toggle" onclick="SoundFX.toggleMute()" title="Toggle Sound">🔊</button>
     </div>
 
@@ -210,10 +210,11 @@
 
     <div id="reader-container">
         <div id="reader"></div>
-        <button type="button" class="close-cam" onclick="stopScanner()">Stop Scanner</button>
+        <button type="button" class="close-cam" onclick="stopScanner()">Close Scanner</button>
     </div>
 
     <div class="content">
+        <!-- 1. AWB SCAN -->
         <div class="field-group">
             <label>1. AWB Tracking Number</label>
             <div class="input-row">
@@ -226,6 +227,7 @@
             <div id="duplicateWarning" style="color: var(--danger); font-size: 12px; font-weight: 700; display: none; margin-top: 10px; background: #fff1f2; padding: 10px 12px; border-radius: var(--radius-md); border: 1px solid #fecdd3;">⚠️ Warning: You have already logged this AWB today.</div>
         </div>
 
+        <!-- 2. AUTO-FILLED DATA -->
         <div class="field-group">
             <label>2. Order Details (Auto-Synced)</label>
             <div class="input-row">
@@ -246,6 +248,7 @@
 
         <div class="divider"></div>
 
+        <!-- 3. PACKET ID -->
         <div class="field-group">
             <label>3. Packet ID verification</label>
             <div class="input-row">
@@ -259,6 +262,7 @@
 
         <div class="divider"></div>
 
+        <!-- 4. CAMERA -->
         <div class="field-group">
             <label>4. Evidence Capture</label>
             
@@ -280,6 +284,7 @@
 
         <div class="divider"></div>
 
+        <!-- 5. TICKET GENERATOR -->
         <div class="field-group">
             <label>5. Smart Ticket Generator</label>
             <div class="radio-group">
@@ -309,6 +314,7 @@
 
         <div class="divider"></div>
 
+        <!-- 6. DASHBOARD -->
         <div class="field-group" style="margin-bottom: 0;">
             <label>6. Local Database Log</label>
             <button type="button" class="btn-log" onclick="logCurrentClaim()">💾 Save Record & Clear Fields</button>
@@ -431,7 +437,7 @@
         document.getElementById('awb').focus(); 
     };
 
-    // --- ON-DEMAND CAMERA ENGINE (Fixes the Android Scanner Lock) ---
+    // --- ON-DEMAND CAMERA ENGINE ---
     let globalMediaStream = null; let liveMediaRecorder = null; let recordedChunks = []; let sizeCheckInterval = null;
 
     async function turnOnCamera() {
@@ -472,7 +478,6 @@
         document.getElementById('live-media-container').style.display = 'none';
         document.getElementById('camera-start-buttons').style.display = 'flex';
         
-        // Reset recording buttons
         document.getElementById('btn-snap').style.display = 'block'; 
         document.getElementById('btn-rec-start').style.display = 'block'; 
         document.getElementById('btn-rec-stop').style.display = 'none';
@@ -497,7 +502,7 @@
             a.download = `Photo_${awbVal}_${ts}.jpg`; a.href = url;
             document.body.appendChild(a); a.click(); document.body.removeChild(a);
             
-            setTimeout(() => { URL.revokeObjectURL(url); ctx.clearRect(0, 0, canvas.width, canvas.height); }, 1000); // Mobile memory flush
+            setTimeout(() => { URL.revokeObjectURL(url); ctx.clearRect(0, 0, canvas.width, canvas.height); }, 1000); 
             
             const status = document.getElementById('mediaStatus'); status.innerHTML = `✅ Snap Saved to Storage Engine`;
             setTimeout(() => { if(globalMediaStream) { status.innerText = "🟢 Camera Active. Ready to capture."; status.style.color = "var(--success)"; } }, 2000);
@@ -530,6 +535,8 @@
         const status = document.getElementById('mediaStatus'); status.innerText = "Compiling video container..."; status.style.color = "var(--text-muted)";
         
         setTimeout(() => {
+            try { let snd = new Audio('https://www.soundjay.com/buttons/beep-07.mp3'); snd.play().catch(e=>{}); } catch(e) {}
+
             const finalBlob = new Blob(recordedChunks, { type: liveMediaRecorder.mimeType || 'video/mp4' });
             const finalSizeMB = (finalBlob.size / (1024 * 1024)).toFixed(2);
             const url = URL.createObjectURL(finalBlob); const a = document.createElement('a');
@@ -547,34 +554,27 @@
         }, 500); 
     }
 
-    // --- BARCODE SCANNER MECHANICS (600ms Android Fix Included) ---
+    // --- SIMULTANEOUS BARCODE SCANNER (Hardware check removed) ---
     async function startScanner(targetField) {
         SoundFX.playTick();
         
-        // Fully destroy main camera if running to free the Android hardware lens
-        if (globalMediaStream) {
-            turnOffCamera();
-            document.getElementById('mediaStatus').innerText = "Camera temporarily paused for barcode scanner...";
-        }
+        // No longer destroying globalMediaStream! Both run side by side.
         
         currentTarget = targetField; 
         document.getElementById('reader-container').style.display = 'block';
         if (html5QrCode && html5QrCode.isScanning) await html5QrCode.stop();
         
-        // Wait 600ms for Motorola/Samsung HAL to release the lens completely
-        setTimeout(() => {
-            html5QrCode = new Html5Qrcode("reader");
-            html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: { width: 260, height: 160 } }, (decodedText) => {
-                const text = String(decodedText).trim();
-                if (currentTarget === 'awb' && (text.includes('http') || text.includes('{'))) return;
-                document.getElementById(currentTarget).value = text;
-                if (currentTarget === 'awb') { findSubOrderId(text); checkDuplicate(text); }
-                generateTicket(); stopScanner(); SoundFX.playScan();
-            }).catch(err => {
-                alert("Camera hardware is locked by your phone. Please close background apps or refresh.");
-                stopScanner();
-            });
-        }, 600);
+        html5QrCode = new Html5Qrcode("reader");
+        html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: { width: 260, height: 160 } }, (decodedText) => {
+            const text = String(decodedText).trim();
+            if (currentTarget === 'awb' && (text.includes('http') || text.includes('{'))) return;
+            document.getElementById(currentTarget).value = text;
+            if (currentTarget === 'awb') { findSubOrderId(text); checkDuplicate(text); }
+            generateTicket(); stopScanner(); SoundFX.playScan();
+        }).catch(err => {
+            alert("Scanner Error: If your phone freezes, click 'Cancel' on the Live Camera first!");
+            stopScanner();
+        });
     }
 
     function stopScanner() {
