@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DINGTREN Claim Hub v6.2</title>
+    <title>DINGTREN Claim Hub v6.5</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -127,7 +127,10 @@
         .status-success { background: var(--success); color: white; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); }
 
         #reader-container { background: #000; display: none; position: relative; border-radius: var(--radius-md); margin: 15px; overflow: hidden; box-shadow: var(--shadow-float);}
-        #reader { width: 100%; }
+        
+        /* NEW: Minimum height and centering for the scanner so it doesn't look blank */
+        #reader { width: 100%; min-height: 250px; display: flex; align-items: center; justify-content: center; background: #1e293b;}
+        
         .close-cam { width: 100%; background: var(--danger); color: white; border: none; padding: 16px; cursor: pointer; font-weight: 800; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; }
 
         .content { padding: 25px 20px; }
@@ -198,7 +201,7 @@
 
 <div class="app-card">
     <div class="header">
-        <h2>DINGTREN CLAIM HUB <span class="v4-badge">v6.2 Flex</span></h2>
+        <h2>DINGTREN CLAIM HUB <span class="v4-badge">v6.5 Elite</span></h2>
         <button id="soundToggle" class="sound-toggle" onclick="SoundFX.toggleMute()" title="Toggle Sound">🔊</button>
     </div>
 
@@ -214,7 +217,6 @@
     </div>
 
     <div class="content">
-        <!-- 1. AWB SCAN -->
         <div class="field-group">
             <label>1. AWB Tracking Number</label>
             <div class="input-row">
@@ -227,7 +229,6 @@
             <div id="duplicateWarning" style="color: var(--danger); font-size: 12px; font-weight: 700; display: none; margin-top: 10px; background: #fff1f2; padding: 10px 12px; border-radius: var(--radius-md); border: 1px solid #fecdd3;">⚠️ Warning: You have already logged this AWB today.</div>
         </div>
 
-        <!-- 2. AUTO-FILLED DATA -->
         <div class="field-group">
             <label>2. Order Details (Auto-Synced)</label>
             <div class="input-row">
@@ -248,7 +249,6 @@
 
         <div class="divider"></div>
 
-        <!-- 3. PACKET ID -->
         <div class="field-group">
             <label>3. Packet ID verification</label>
             <div class="input-row">
@@ -262,7 +262,6 @@
 
         <div class="divider"></div>
 
-        <!-- 4. CAMERA -->
         <div class="field-group">
             <label>4. Evidence Capture</label>
             
@@ -284,7 +283,6 @@
 
         <div class="divider"></div>
 
-        <!-- 5. TICKET GENERATOR -->
         <div class="field-group">
             <label>5. Smart Ticket Generator</label>
             <div class="radio-group">
@@ -314,7 +312,6 @@
 
         <div class="divider"></div>
 
-        <!-- 6. DASHBOARD -->
         <div class="field-group" style="margin-bottom: 0;">
             <label>6. Local Database Log</label>
             <button type="button" class="btn-log" onclick="logCurrentClaim()">💾 Save Record & Clear Fields</button>
@@ -465,7 +462,6 @@
     }
 
     function turnOffCamera() {
-        SoundFX.playPop();
         if (globalMediaStream) {
             globalMediaStream.getTracks().forEach(track => track.stop());
             globalMediaStream = null;
@@ -554,27 +550,55 @@
         }, 500); 
     }
 
-    // --- SIMULTANEOUS BARCODE SCANNER (Hardware check removed) ---
+    // --- SMART BARCODE SCANNER (ANDROID HARDWARE FIX) ---
     async function startScanner(targetField) {
         SoundFX.playTick();
         
-        // No longer destroying globalMediaStream! Both run side by side.
+        // 1. Force kill the live camera so Motorola hardware gives the lens to the scanner
+        turnOffCamera();
         
         currentTarget = targetField; 
-        document.getElementById('reader-container').style.display = 'block';
+        const container = document.getElementById('reader-container');
+        const readerDiv = document.getElementById('reader');
+        
+        container.style.display = 'block';
+        readerDiv.innerHTML = '<div style="color:white; font-size: 14px; font-weight: bold; margin-top: 100px;">🔄 Warming up scanner lens... Please wait.</div>';
+        
         if (html5QrCode && html5QrCode.isScanning) await html5QrCode.stop();
         
-        html5QrCode = new Html5Qrcode("reader");
-        html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: { width: 260, height: 160 } }, (decodedText) => {
-            const text = String(decodedText).trim();
-            if (currentTarget === 'awb' && (text.includes('http') || text.includes('{'))) return;
-            document.getElementById(currentTarget).value = text;
-            if (currentTarget === 'awb') { findSubOrderId(text); checkDuplicate(text); }
-            generateTicket(); stopScanner(); SoundFX.playScan();
-        }).catch(err => {
-            alert("Scanner Error: If your phone freezes, click 'Cancel' on the Live Camera first!");
-            stopScanner();
-        });
+        // 2. Wait exactly 800ms to let the Android hardware flush its cache
+        setTimeout(async () => {
+            try {
+                html5QrCode = new Html5Qrcode("reader");
+                
+                // Advanced Camera Bypass: Try to pull the exact ID of the back camera instead of relying on "facingMode"
+                const devices = await Html5Qrcode.getCameras();
+                let cameraId = null;
+                
+                if (devices && devices.length > 0) {
+                    const backCamera = devices.find(d => d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('rear') || d.label.toLowerCase().includes('environment'));
+                    cameraId = backCamera ? backCamera.id : devices[devices.length - 1].id;
+                }
+
+                const config = { fps: 15, qrbox: { width: 250, height: 150 } };
+                
+                const onScanSuccess = (decodedText) => {
+                    const text = String(decodedText).trim();
+                    if (currentTarget === 'awb' && (text.includes('http') || text.includes('{'))) return;
+                    document.getElementById(currentTarget).value = text;
+                    if (currentTarget === 'awb') { findSubOrderId(text); checkDuplicate(text); }
+                    generateTicket(); stopScanner(); SoundFX.playScan();
+                };
+
+                if (cameraId) {
+                    await html5QrCode.start(cameraId, config, onScanSuccess);
+                } else {
+                    await html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess);
+                }
+            } catch (err) {
+                readerDiv.innerHTML = `<div style="color:var(--danger); padding:20px; font-weight:bold;">⚠️ Camera Error. Please click "Close Scanner" and refresh your browser.</div>`;
+            }
+        }, 800);
     }
 
     function stopScanner() {
